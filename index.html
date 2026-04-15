@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GIS Dashboard Pro</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+html,body{margin:0;height:100%;font-family:Arial;}
+
+#sidebar{
+  position:absolute;
+  left:0;top:0;width:320px;height:100%;
+  background:#0f172a;color:#fff;padding:15px;
+  overflow:auto;z-index:1000;
+}
+
+#map{
+  position:absolute;
+  left:320px;top:0;right:0;bottom:0;
+}
+
+select,input{width:100%;margin:5px 0;}
+
+/* ================= BRANDING ================= */
+#credit{
+  position:fixed;
+  bottom:15px;
+  right:15px;
+  z-index:999999;
+
+  background:rgba(15,23,42,0.65);
+  backdrop-filter: blur(12px);
+
+  padding:12px 18px;
+  border-radius:18px;
+
+  border:1px solid rgba(255,255,255,0.1);
+
+  box-shadow:
+    0 0 20px rgba(56,189,248,0.4),
+    0 0 50px rgba(56,189,248,0.2);
+
+  pointer-events:none;
+
+  animation: float 4s ease-in-out infinite;
+}
+
+.brand-container{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.brand-logo{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:bold;font-size:14px;color:#fff;
+
+  background:linear-gradient(135deg,#38bdf8,#6366f1);
+
+  box-shadow:
+    0 0 10px rgba(56,189,248,0.8),
+    0 0 20px rgba(99,102,241,0.6);
+
+  animation:pulse 2s infinite;
+}
+
+.brand-name{
+  font-size:15px;
+  font-weight:bold;
+  color:#38bdf8;
+
+  text-shadow:
+    0 0 10px rgba(56,189,248,0.9),
+    0 0 25px rgba(56,189,248,0.5);
+}
+
+.brand-title{
+  font-size:11px;
+  color:#e2e8f0;
+  letter-spacing:2px;
+}
+
+@keyframes pulse{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.1);}
+  100%{transform:scale(1);}
+}
+
+@keyframes float{
+  0%{transform:translateY(0);}
+  50%{transform:translateY(-5px);}
+  100%{transform:translateY(0);}
+}
+
+/* ================= LEGEND ================= */
+.legend{
+  background:#fff;
+  padding:10px;
+  border-radius:8px;
+  font-size:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="sidebar">
+
+<h2>🌍 GIS Dashboard</h2>
+
+<h3>Search</h3>
+<input type="text" id="searchBox" placeholder="Search..." onkeyup="searchFeature()">
+
+<hr>
+
+<h3>USE Filter</h3>
+<select id="useFilter" onchange="filterUSE()">
+<option value="all">All</option>
+<option value="سكني">سكني</option>
+<option value="تجاري">تجاري</option>
+<option value="صناعي">صناعي</option>
+<option value="خدمات">خدمات</option>
+<option value="المرافق">المرافق</option>
+</select>
+
+<h3>Network Filter</h3>
+<select id="noFilter" onchange="filterNetwork()">
+<option value="all">All</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+</select>
+
+<hr>
+
+<h3>Satellite</h3>
+Brightness
+<input type="range" id="brightness" min="50" max="150" value="100" oninput="updateImagery()">
+Contrast
+<input type="range" id="contrast" min="50" max="150" value="100" oninput="updateImagery()">
+
+<hr>
+
+<h3>Stats</h3>
+<div id="stats"></div>
+
+</div>
+
+<div id="map"></div>
+
+<!-- BRAND -->
+<div id="credit">
+  <div class="brand-container">
+    <div class="brand-logo">AZ</div>
+    <div>
+      <div class="brand-name">AHMED ZEEN</div>
+      <div class="brand-title">GIS SPECIALIST</div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// MAP
+const map=L.map('map').setView([28.4,48.5],12);
+
+const imagery=L.tileLayer(
+'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+).addTo(map);
+
+const osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+// DATA
+let useDataGlobal,networkDataGlobal;
+
+// COLORS
+function getUSEColor(u){
+if(!u)return"#999";
+if(u.includes("سكني"))return"#f1c40f";
+if(u.includes("تجاري"))return"#e74c3c";
+if(u.includes("صناعي"))return"#9b59b6";
+if(u.includes("خدمات"))return"#3498db";
+if(u.includes("المرافق"))return"#000";
+return"#95a5a6";
+}
+
+function getNetworkColor(n){
+n=Number(n);
+return ["#00bcd4","#ff9800","#9b59b6","#e74c3c","#2ecc71","#1abc9c","#34495e"][n-1]||"#999";
+}
+
+// LAYERS
+let khafjiLayer=L.geoJSON(null,{
+style:f=>({color:getUSEColor(f.properties?.USE),weight:2,fillOpacity:0.6}),
+onEachFeature:(f,l)=>{
+l.on({
+mouseover:e=>e.target.setStyle({weight:4}),
+mouseout:e=>khafjiLayer.resetStyle(e.target),
+click:e=>map.fitBounds(e.target.getBounds())
+});
+}
+}).addTo(map);
+
+let networkLayer=L.geoJSON(null,{
+style:f=>({color:getNetworkColor(f.properties?.NO),weight:3}),
+onEachFeature:(f,l)=>{
+let c=getNetworkColor(f.properties?.NO);
+l.on({
+mouseover:e=>e.target.setStyle({color:"#ff0",weight:5}),
+mouseout:e=>e.target.setStyle({color:c,weight:3})
+});
+}
+}).addTo(map);
+
+// LOAD
+fetch('data/alkhafje.geojson').then(r=>r.json()).then(d=>{
+useDataGlobal=d;
+khafjiLayer.addData(d);
+updateStats();
+});
+
+fetch('data/alkhafje-network.json').then(r=>r.json()).then(d=>{
+networkDataGlobal=d;
+networkLayer.addData(d);
+});
+
+// FILTERS
+function filterUSE(){
+let v=document.getElementById("useFilter").value;
+khafjiLayer.clearLayers();
+let f=v==="all"?useDataGlobal.features:
+useDataGlobal.features.filter(x=>String(x.properties?.USE).includes(v));
+khafjiLayer.addData({type:"FeatureCollection",features:f});
+updateStats();
+}
+
+function filterNetwork(){
+let v=document.getElementById("noFilter").value;
+networkLayer.clearLayers();
+let f=v==="all"?networkDataGlobal.features:
+networkDataGlobal.features.filter(x=>String(x.properties?.NO)===v);
+networkLayer.addData({type:"FeatureCollection",features:f});
+}
+
+// SEARCH
+function searchFeature(){
+let txt=document.getElementById("searchBox").value.toLowerCase();
+khafjiLayer.eachLayer(l=>{
+let p=Object.values(l.feature.properties).join(" ").toLowerCase();
+if(p.includes(txt)){
+l.setStyle({weight:5});
+}else{
+khafjiLayer.resetStyle(l);
+}
+});
+}
+
+// STATS
+function updateStats(){
+let c={};
+useDataGlobal.features.forEach(f=>{
+let u=f.properties?.USE||"Other";
+c[u]=(c[u]||0)+1;
+});
+let html="";
+for(let k in c){html+=`${k}: ${c[k]}<br>`;}
+document.getElementById("stats").innerHTML=html;
+}
+
+// IMAGERY
+function updateImagery(){
+let b=document.getElementById("brightness").value;
+let c=document.getElementById("contrast").value;
+document.querySelector(".leaflet-tile-pane").style.filter=
+`brightness(${b}%) contrast(${c}%)`;
+}
+
+// LEGEND
+let legend=L.control({position:"bottomleft"});
+legend.onAdd=function(){
+let d=L.DomUtil.create("div","legend");
+d.innerHTML=`
+<b>USE</b><br>
+🟡 سكني<br>
+🔴 تجاري<br>
+🟣 صناعي<br>
+🔵 خدمات<br>
+⚫ مرافق<br><hr>
+<b>Network</b><br>
+1-7 colors
+`;
+return d;
+};
+legend.addTo(map);
+
+</script>
+
+</body>
+</html>
