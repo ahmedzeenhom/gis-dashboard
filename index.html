@@ -8,94 +8,104 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
-html,body{margin:0;height:100%;font-family:Arial;}
+html,body{
+  margin:0;
+  height:100%;
+  font-family:Arial;
+  overflow:hidden;
+}
 
+/* ================= SIDEBAR ================= */
 #sidebar{
   position:absolute;
-  left:0;top:0;width:320px;height:100%;
-  background:#0f172a;color:#fff;padding:15px;
-  overflow:auto;z-index:1000;
+  left:0;top:0;
+  width:340px;height:100%;
+
+  background:rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  color:#fff;
+  padding:12px;
+  overflow:auto;
+  z-index:1000;
+
+  border-right:1px solid rgba(255,255,255,0.08);
+  transition:0.3s ease;
 }
 
+/* ================= MAP ================= */
 #map{
   position:absolute;
-  left:320px;top:0;right:0;bottom:0;
+  left:340px;
+  top:15px;
+  right:0;
+  bottom:0;
 }
 
-select,input{width:100%;margin:5px 0;}
+/* ================= TOGGLE ================= */
+#toggleBtn{
+  position:absolute;
+  top:10px;
+  left:350px;
+  z-index:2000;
 
-/* ================= BRANDING ================= */
+  background:rgba(56,189,248,0.2);
+  border:1px solid rgba(56,189,248,0.4);
+  color:#38bdf8;
+
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+
+  backdrop-filter: blur(10px);
+}
+
+/* ================= HEADER ================= */
+#headerBox{
+  margin-bottom:10px;
+  background:rgba(56,189,248,0.08);
+  border:1px solid rgba(56,189,248,0.3);
+  border-radius:10px;
+}
+
+#headerTitle{
+  padding:10px;
+  cursor:pointer;
+  font-weight:bold;
+  color:#38bdf8;
+  display:flex;
+  justify-content:space-between;
+}
+
+#headerContent{padding:10px;}
+
+.mainTitle{font-size:13px;line-height:1.4;}
+.subTitle{font-size:11px;color:#94a3b8;margin-top:5px;}
+
+select,input{width:100%;margin:6px 0;}
+
+/* ================= BRAND ================= */
 #credit{
   position:fixed;
-  bottom:15px;
-  right:15px;
-  z-index:999999;
+  bottom:2px;
+  right:1px;
+  z-index:9999;
 
-  background:rgba(15,23,42,0.65);
-  backdrop-filter: blur(12px);
-
-  padding:12px 18px;
-  border-radius:18px;
-
-  border:1px solid rgba(255,255,255,0.1);
-
-  box-shadow:
-    0 0 20px rgba(56,189,248,0.4),
-    0 0 50px rgba(56,189,248,0.2);
-
-  pointer-events:none;
-
-  animation: float 4s ease-in-out infinite;
-}
-
-.brand-container{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.brand-logo{
-  width:40px;height:40px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:bold;font-size:14px;color:#fff;
-
-  background:linear-gradient(135deg,#38bdf8,#6366f1);
-
-  box-shadow:
-    0 0 10px rgba(56,189,248,0.8),
-    0 0 20px rgba(99,102,241,0.6);
-
-  animation:pulse 2s infinite;
+  background:rgba(15,23,42,0.75);
+  padding:10px 14px;
+  border-radius:14px;
+  border:1px solid rgba(56,189,248,0.4);
 }
 
 .brand-name{
-  font-size:15px;
-  font-weight:bold;
   color:#38bdf8;
+  font-weight:bold;
+  text-shadow:0 0 10px #38bdf8;
 }
 
 .brand-title{
-  font-size:11px;
-  color:#e2e8f0;
-  letter-spacing:2px;
-}
-
-@keyframes pulse{
-  0%{transform:scale(1);}
-  50%{transform:scale(1.1);}
-  100%{transform:scale(1);}
-}
-
-@keyframes float{
-  0%{transform:translateY(0);}
-  50%{transform:translateY(-5px);}
-  100%{transform:translateY(0);}
-}
-
-.legend{
-  background:#fff;
-  padding:10px;
-  border-radius:8px;
+  color:#fff;
   font-size:12px;
 }
 </style>
@@ -103,238 +113,211 @@ select,input{width:100%;margin:5px 0;}
 
 <body>
 
+<div id="toggleBtn" onclick="toggleSidebar()">☰</div>
+
 <div id="sidebar">
 
-<h2>🌍 GIS Dashboard</h2>
+<div id="headerBox">
+  <div id="headerTitle" onclick="toggleHeader()">
+    🌍 مشروع درء أخطار السيول بمحافظة الخفجي
+    <span id="arrow">▼</span>
+  </div>
 
-<h3>Search</h3>
-<input type="text" id="searchBox" placeholder="Search..." onkeyup="searchFeature()">
-
-<hr>
-
-<h3>USE Filter</h3>
-<select id="useFilter" onchange="filterUSE()">
-<option value="all">All</option>
-<option value="سكني">سكني</option>
-<option value="تجاري">تجاري</option>
-<option value="صناعي">صناعي</option>
-<option value="خدمات">خدمات</option>
-<option value="المرافق">المرافق</option>
-</select>
-
-<h3>Network Filter</h3>
-<select id="noFilter" onchange="filterNetwork()">
-<option value="all">All</option>
-<option value="1">1</option>
-<option value="2">2</option>
-<option value="3">3</option>
-<option value="4">4</option>
-<option value="5">5</option>
-<option value="6">6</option>
-<option value="7">7</option>
-</select>
+  <div id="headerContent">
+    <div class="mainTitle">
+      مشروع دراسات وتصاميم وتخفيض منسوب المياه السطحية ودرء أخطار السيول بمحافظة الخفجي
+    </div>
+    <div class="subTitle">GIS Web Dashboard</div>
+  </div>
+</div>
 
 <hr>
 
-<h3>Satellite</h3>
+<h3>استخدامات الأراضي</h3>
+<select>
+<option>All</option>
+<option>سكني</option>
+<option>تجاري</option>
+<option>صناعي</option>
+<option>خدمات</option>
+<option>المرافق</option>
+</select>
+
+<h3>الشبكات</h3>
+<select>
+<option>All</option>
+<option>1</option>
+<option>2</option>
+<option>3</option>
+<option>4</option>
+<option>5</option>
+<option>6</option>
+<option>7</option>
+</select>
+
+<h3>خطوط الطرد</h3>
+<select>
+<option>All</option>
+<option>1</option>
+<option>2</option>
+<option>3</option>
+<option>4</option>
+<option>5</option>
+<option>6</option>
+</select>
+
+<hr>
+
+<h3>الصورة الجوية</h3>
 Brightness
-<input type="range" id="brightness" min="50" max="150" value="100" oninput="updateImagery()">
+<input type="range" id="brightness" min="50" max="150" value="100">
 Contrast
-<input type="range" id="contrast" min="50" max="150" value="100" oninput="updateImagery()">
-
-<hr>
-
-<h3>Stats</h3>
-<div id="stats"></div>
+<input type="range" id="contrast" min="50" max="150" value="100">
 
 </div>
 
 <div id="map"></div>
 
-<!-- BRAND -->
 <div id="credit">
-  <div class="brand-container">
-    <div class="brand-logo">AZ</div>
-    <div>
-      <div class="brand-name">AHMED ZEEN</div>
-      <div class="brand-title">GIS SPECIALIST</div>
-    </div>
-  </div>
+  <div class="brand-name">AHMED ZEEN</div>
+  <div class="brand-title">GIS SPECIALIST</div>
 </div>
 
 <script>
 
-// ================= MAP =================
-const map = L.map('map').setView([28.4, 48.5], 12);
+try {
 
-// BASE LAYERS
+// ================= MAP (NO setView = NO FLICKER) =================
+const map = L.map('map', {
+  zoomControl: true
+});
+
+// BASEMAP
 const imagery = L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+).addTo(map);
+
+const street = L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 );
 
-const osm = L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-);
-
-imagery.addTo(map);
-
-// ================= DATA =================
-let useDataGlobal, networkDataGlobal;
-
-// ================= COLORS =================
+// COLORS
 function getUSEColor(u){
-if(!u)return"#999";
-if(u.includes("سكني"))return"#f1c40f";
-if(u.includes("تجاري"))return"#e74c3c";
-if(u.includes("صناعي"))return"#9b59b6";
-if(u.includes("خدمات"))return"#3498db";
-if(u.includes("المرافق"))return"#000";
-return"#95a5a6";
-}
-
-function getNetworkColor(n){
-n=Number(n);
-return ["#00bcd4","#ff9800","#9b59b6","#e74c3c","#2ecc71","#1abc9c","#34495e"][n-1]||"#999";
+  if(!u) return "#999";
+  if(u.includes("سكني")) return "#f1c40f";
+  if(u.includes("تجاري")) return "#e74c3c";
+  if(u.includes("صناعي")) return "#9b59b6";
+  if(u.includes("خدمات")) return "#3498db";
+  if(u.includes("المرافق")) return "#2c3e50";
+  return "#95a5a6";
 }
 
 // ================= LAYERS =================
 let khafjiLayer = L.geoJSON(null,{
-style:f=>({color:getUSEColor(f.properties?.USE),weight:2,fillOpacity:0.6}),
-onEachFeature:(f,l)=>{
-l.on({
-mouseover:e=>e.target.setStyle({weight:4}),
-mouseout:e=>khafjiLayer.resetStyle(e.target),
-click:e=>map.fitBounds(e.target.getBounds())
-});
-}
+  style: f => ({
+    fillColor: getUSEColor(f.properties?.USE),
+    color: "#000",
+    weight: 1,
+    fillOpacity: 0.65
+  })
 }).addTo(map);
 
 let networkLayer = L.geoJSON(null,{
-style:f=>({color:getNetworkColor(f.properties?.NO),weight:3}),
-onEachFeature:(f,l)=>{
-let c=getNetworkColor(f.properties?.NO);
-l.on({
-mouseover:e=>e.target.setStyle({color:"#ff0",weight:5}),
-mouseout:e=>e.target.setStyle({color:c,weight:3})
-});
-}
+  style:{color:"#8B0000",weight:2}
 }).addTo(map);
 
-// ================= LAYERS CONTROL (FIXED) =================
-const baseMaps = {
-  "🌍 Imagery": imagery,
-  "🗺️ OSM": osm
-};
-
-const overlayMaps = {
-  "📍 Khafji Layer": khafjiLayer,
-  "🔗 Network Layer": networkLayer
-};
-
-L.control.layers(baseMaps, overlayMaps, {
-  collapsed: false
+let pressureLayer = L.geoJSON(null,{
+  style:{color:"#000",weight:3}
 }).addTo(map);
 
-// ================= LOAD =================
+// ================= LOAD DATA =================
 fetch('data/alkhafje.geojson')
 .then(r=>r.json())
 .then(d=>{
-useDataGlobal=d;
-khafjiLayer.addData(d);
-updateStats();
+  khafjiLayer.addData(d);
+
+  // ✅ EXTENT AFTER LOAD (NO FLICKER)
+  requestAnimationFrame(()=>{
+    const bounds = khafjiLayer.getBounds();
+
+    if(bounds.isValid()){
+      map.fitBounds(bounds,{
+        padding:[40,40],
+        maxZoom:14,
+        animate:true,
+        duration:1.2
+      });
+    }
+  });
 });
 
-fetch('data/alkhafje-network.json')
-.then(r=>r.json())
-.then(d=>{
-networkDataGlobal=d;
-networkLayer.addData(d);
-});
+fetch('data/alkhafje-network.json').then(r=>r.json()).then(d=>networkLayer.addData(d));
+fetch('data/pressure_line.geojson').then(r=>r.json()).then(d=>pressureLayer.addData(d));
 
-// ================= FILTER =================
-function filterUSE(){
-let v=document.getElementById("useFilter").value;
-khafjiLayer.clearLayers();
-
-let f = v==="all"
-? useDataGlobal.features
-: useDataGlobal.features.filter(x=>String(x.properties?.USE).includes(v));
-
-khafjiLayer.addData({type:"FeatureCollection",features:f});
-updateStats();
+// ================= LAYERS CONTROL =================
+L.control.layers(
+{
+  "🛰 Imagery": imagery,
+  "🗺 Street": street
+},
+{
+  "📐 المخطط الإرشادي": khafjiLayer,
+  "🔌 الشبكات": networkLayer,
+  "🚰 خطوط الطرد": pressureLayer
+},
+{
+  collapsed:false,
+  position:"topright"
 }
+).addTo(map);
 
-function filterNetwork(){
-let v=document.getElementById("noFilter").value;
-networkLayer.clearLayers();
-
-let f = v==="all"
-? networkDataGlobal.features
-: networkDataGlobal.features.filter(x=>String(x.properties?.NO)===v);
-
-networkLayer.addData({type:"FeatureCollection",features:f});
-}
-
-// ================= SEARCH =================
-function searchFeature(){
-let txt=document.getElementById("searchBox").value.toLowerCase();
-
-khafjiLayer.eachLayer(l=>{
-let p=Object.values(l.feature.properties).join(" ").toLowerCase();
-
-if(p.includes(txt)){
-l.setStyle({weight:5});
-}else{
-khafjiLayer.resetStyle(l);
-}
-});
-}
-
-// ================= STATS =================
-function updateStats(){
-let c={};
-
-useDataGlobal.features.forEach(f=>{
-let u=f.properties?.USE||"Other";
-c[u]=(c[u]||0)+1;
-});
-
-let html="";
-for(let k in c){
-html+=`${k}: ${c[k]}<br>`;
-}
-
-document.getElementById("stats").innerHTML=html;
-}
-
-// ================= IMAGERY =================
+// ================= IMAGE FILTER =================
 function updateImagery(){
-let b=document.getElementById("brightness").value;
-let c=document.getElementById("contrast").value;
+let b=document.getElementById("brightness")?.value || 100;
+let c=document.getElementById("contrast")?.value || 100;
 
 document.querySelector(".leaflet-tile-pane").style.filter=
 `brightness(${b}%) contrast(${c}%)`;
 }
 
-// ================= LEGEND =================
-let legend = L.control({position:"bottomleft"});
+document.getElementById("brightness").oninput=updateImagery;
+document.getElementById("contrast").oninput=updateImagery;
 
-legend.onAdd = function(){
-let div = L.DomUtil.create("div","legend");
-div.innerHTML = `
-<b>USE</b><br>
-🟡 سكني<br>
-🔴 تجاري<br>
-🟣 صناعي<br>
-🔵 خدمات<br>
-⚫ مرافق<br><hr>
-<b>Network</b><br>
-1-7 colors
-`;
-return div;
-};
+// ================= TOGGLES =================
+window.toggleHeader=function(){
+let el=document.getElementById("headerContent");
+let a=document.getElementById("arrow");
 
-legend.addTo(map);
+if(el.style.display==="none"){
+el.style.display="block";a.innerHTML="▼";
+}else{
+el.style.display="none";a.innerHTML="▲";
+}
+}
+
+window.sidebarOpen=true;
+
+window.toggleSidebar=function(){
+const sidebar=document.getElementById("sidebar");
+const mapDiv=document.getElementById("map");
+const btn=document.getElementById("toggleBtn");
+
+if(window.sidebarOpen){
+sidebar.style.transform="translateX(-100%)";
+mapDiv.style.left="0px";
+btn.style.left="10px";
+window.sidebarOpen=false;
+}else{
+sidebar.style.transform="translateX(0)";
+mapDiv.style.left="340px";
+btn.style.left="350px";
+window.sidebarOpen=true;
+}
+}
+
+} catch(e){
+console.log(e);
+}
 
 </script>
 
