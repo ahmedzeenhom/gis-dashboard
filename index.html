@@ -72,10 +72,6 @@ select,input{width:100%;margin:5px 0;}
   font-size:15px;
   font-weight:bold;
   color:#38bdf8;
-
-  text-shadow:
-    0 0 10px rgba(56,189,248,0.9),
-    0 0 25px rgba(56,189,248,0.5);
 }
 
 .brand-title{
@@ -96,7 +92,6 @@ select,input{width:100%;margin:5px 0;}
   100%{transform:translateY(0);}
 }
 
-/* ================= LEGEND ================= */
 .legend{
   background:#fff;
   padding:10px;
@@ -169,19 +164,24 @@ Contrast
 
 <script>
 
-// MAP
-const map=L.map('map').setView([28.4,48.5],12);
+// ================= MAP =================
+const map = L.map('map').setView([28.4, 48.5], 12);
 
-const imagery=L.tileLayer(
-'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-).addTo(map);
+// BASE LAYERS
+const imagery = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+);
 
-const osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+const osm = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+);
 
-// DATA
-let useDataGlobal,networkDataGlobal;
+imagery.addTo(map);
 
-// COLORS
+// ================= DATA =================
+let useDataGlobal, networkDataGlobal;
+
+// ================= COLORS =================
 function getUSEColor(u){
 if(!u)return"#999";
 if(u.includes("سكني"))return"#f1c40f";
@@ -197,8 +197,8 @@ n=Number(n);
 return ["#00bcd4","#ff9800","#9b59b6","#e74c3c","#2ecc71","#1abc9c","#34495e"][n-1]||"#999";
 }
 
-// LAYERS
-let khafjiLayer=L.geoJSON(null,{
+// ================= LAYERS =================
+let khafjiLayer = L.geoJSON(null,{
 style:f=>({color:getUSEColor(f.properties?.USE),weight:2,fillOpacity:0.6}),
 onEachFeature:(f,l)=>{
 l.on({
@@ -209,7 +209,7 @@ click:e=>map.fitBounds(e.target.getBounds())
 }
 }).addTo(map);
 
-let networkLayer=L.geoJSON(null,{
+let networkLayer = L.geoJSON(null,{
 style:f=>({color:getNetworkColor(f.properties?.NO),weight:3}),
 onEachFeature:(f,l)=>{
 let c=getNetworkColor(f.properties?.NO);
@@ -220,24 +220,46 @@ mouseout:e=>e.target.setStyle({color:c,weight:3})
 }
 }).addTo(map);
 
-// LOAD
-fetch('data/alkhafje.geojson').then(r=>r.json()).then(d=>{
+// ================= LAYERS CONTROL (FIXED) =================
+const baseMaps = {
+  "🌍 Imagery": imagery,
+  "🗺️ OSM": osm
+};
+
+const overlayMaps = {
+  "📍 Khafji Layer": khafjiLayer,
+  "🔗 Network Layer": networkLayer
+};
+
+L.control.layers(baseMaps, overlayMaps, {
+  collapsed: false
+}).addTo(map);
+
+// ================= LOAD =================
+fetch('data/alkhafje.geojson')
+.then(r=>r.json())
+.then(d=>{
 useDataGlobal=d;
 khafjiLayer.addData(d);
 updateStats();
 });
 
-fetch('data/alkhafje-network.json').then(r=>r.json()).then(d=>{
+fetch('data/alkhafje-network.json')
+.then(r=>r.json())
+.then(d=>{
 networkDataGlobal=d;
 networkLayer.addData(d);
 });
 
-// FILTERS
+// ================= FILTER =================
 function filterUSE(){
 let v=document.getElementById("useFilter").value;
 khafjiLayer.clearLayers();
-let f=v==="all"?useDataGlobal.features:
-useDataGlobal.features.filter(x=>String(x.properties?.USE).includes(v));
+
+let f = v==="all"
+? useDataGlobal.features
+: useDataGlobal.features.filter(x=>String(x.properties?.USE).includes(v));
+
 khafjiLayer.addData({type:"FeatureCollection",features:f});
 updateStats();
 }
@@ -245,16 +267,21 @@ updateStats();
 function filterNetwork(){
 let v=document.getElementById("noFilter").value;
 networkLayer.clearLayers();
-let f=v==="all"?networkDataGlobal.features:
-networkDataGlobal.features.filter(x=>String(x.properties?.NO)===v);
+
+let f = v==="all"
+? networkDataGlobal.features
+: networkDataGlobal.features.filter(x=>String(x.properties?.NO)===v);
+
 networkLayer.addData({type:"FeatureCollection",features:f});
 }
 
-// SEARCH
+// ================= SEARCH =================
 function searchFeature(){
 let txt=document.getElementById("searchBox").value.toLowerCase();
+
 khafjiLayer.eachLayer(l=>{
 let p=Object.values(l.feature.properties).join(" ").toLowerCase();
+
 if(p.includes(txt)){
 l.setStyle({weight:5});
 }else{
@@ -263,31 +290,38 @@ khafjiLayer.resetStyle(l);
 });
 }
 
-// STATS
+// ================= STATS =================
 function updateStats(){
 let c={};
+
 useDataGlobal.features.forEach(f=>{
 let u=f.properties?.USE||"Other";
 c[u]=(c[u]||0)+1;
 });
+
 let html="";
-for(let k in c){html+=`${k}: ${c[k]}<br>`;}
+for(let k in c){
+html+=`${k}: ${c[k]}<br>`;
+}
+
 document.getElementById("stats").innerHTML=html;
 }
 
-// IMAGERY
+// ================= IMAGERY =================
 function updateImagery(){
 let b=document.getElementById("brightness").value;
 let c=document.getElementById("contrast").value;
+
 document.querySelector(".leaflet-tile-pane").style.filter=
 `brightness(${b}%) contrast(${c}%)`;
 }
 
-// LEGEND
-let legend=L.control({position:"bottomleft"});
-legend.onAdd=function(){
-let d=L.DomUtil.create("div","legend");
-d.innerHTML=`
+// ================= LEGEND =================
+let legend = L.control({position:"bottomleft"});
+
+legend.onAdd = function(){
+let div = L.DomUtil.create("div","legend");
+div.innerHTML = `
 <b>USE</b><br>
 🟡 سكني<br>
 🔴 تجاري<br>
@@ -297,8 +331,9 @@ d.innerHTML=`
 <b>Network</b><br>
 1-7 colors
 `;
-return d;
+return div;
 };
+
 legend.addTo(map);
 
 </script>
