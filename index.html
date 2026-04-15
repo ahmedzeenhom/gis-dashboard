@@ -41,6 +41,7 @@ html,body{
   top:15px;
   right:0;
   bottom:0;
+  transition:0.3s ease;
 }
 
 /* ================= TOGGLE ================= */
@@ -108,6 +109,17 @@ select,input{width:100%;margin:6px 0;}
   color:#fff;
   font-size:12px;
 }
+
+/* ================= FIX: LAYERS CONTROL ================= */
+.leaflet-top,
+.leaflet-right{
+  z-index:99999 !important;
+}
+
+.leaflet-control-layers{
+  display:block !important;
+  opacity:1 !important;
+}
 </style>
 </head>
 
@@ -134,36 +146,27 @@ select,input{width:100%;margin:6px 0;}
 <hr>
 
 <h3>استخدامات الأراضي</h3>
-<select>
-<option>All</option>
-<option>سكني</option>
-<option>تجاري</option>
-<option>صناعي</option>
-<option>خدمات</option>
-<option>المرافق</option>
+<select id="useFilter" onchange="filterUSE()">
+  <option value="all">All</option>
+  <option value="سكني">سكني</option>
+  <option value="تجاري">تجاري</option>
+  <option value="صناعي">صناعي</option>
+  <option value="خدمات">خدمات</option>
+  <option value="المرافق">المرافق</option>
 </select>
 
 <h3>الشبكات</h3>
 <select>
-<option>All</option>
-<option>1</option>
-<option>2</option>
-<option>3</option>
-<option>4</option>
-<option>5</option>
-<option>6</option>
-<option>7</option>
+  <option>All</option>
+  <option>1</option>
+  <option>2</option>
 </select>
 
 <h3>خطوط الطرد</h3>
 <select>
-<option>All</option>
-<option>1</option>
-<option>2</option>
-<option>3</option>
-<option>4</option>
-<option>5</option>
-<option>6</option>
+  <option>All</option>
+  <option>1</option>
+  <option>2</option>
 </select>
 
 <hr>
@@ -187,12 +190,10 @@ Contrast
 
 try {
 
-// ================= MAP (NO setView = NO FLICKER) =================
-const map = L.map('map', {
-  zoomControl: true
-});
+// ================= MAP =================
+const map = L.map('map').setView([28.4, 48.5], 13);
 
-// BASEMAP
+// ================= BASEMAPS =================
 const imagery = L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 ).addTo(map);
@@ -201,7 +202,7 @@ const street = L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 );
 
-// COLORS
+// ================= COLORS =================
 function getUSEColor(u){
   if(!u) return "#999";
   if(u.includes("سكني")) return "#f1c40f";
@@ -214,11 +215,11 @@ function getUSEColor(u){
 
 // ================= LAYERS =================
 let khafjiLayer = L.geoJSON(null,{
-  style: f => ({
-    fillColor: getUSEColor(f.properties?.USE),
-    color: "#000",
-    weight: 1,
-    fillOpacity: 0.65
+  style:f=>({
+    fillColor:getUSEColor(f.properties?.USE),
+    color:"#000",
+    weight:1,
+    fillOpacity:0.65
   })
 }).addTo(map);
 
@@ -230,31 +231,40 @@ let pressureLayer = L.geoJSON(null,{
   style:{color:"#000",weight:3}
 }).addTo(map);
 
+// ================= STORE =================
+window._khafjiOriginal = [];
+
 // ================= LOAD DATA =================
 fetch('data/alkhafje.geojson')
 .then(r=>r.json())
 .then(d=>{
+
   khafjiLayer.addData(d);
+  window._khafjiOriginal = d.features;
 
-  // ✅ EXTENT AFTER LOAD (NO FLICKER)
-  requestAnimationFrame(()=>{
-    const bounds = khafjiLayer.getBounds();
+  const bounds = khafjiLayer.getBounds();
+  if(bounds.isValid()){
+    map.fitBounds(bounds,{
+      padding:[40,40],
+      maxZoom:14
+    });
+  }
 
-    if(bounds.isValid()){
-      map.fitBounds(bounds,{
-        padding:[40,40],
-        maxZoom:14,
-        animate:true,
-        duration:1.2
-      });
-    }
-  });
 });
 
-fetch('data/alkhafje-network.json').then(r=>r.json()).then(d=>networkLayer.addData(d));
-fetch('data/pressure_line.geojson').then(r=>r.json()).then(d=>pressureLayer.addData(d));
+// ================= NETWORK =================
+fetch('data/alkhafje-network.json')
+.then(r=>r.json())
+.then(d=>networkLayer.addData(d));
 
-// ================= LAYERS CONTROL =================
+// ================= PRESSURE =================
+fetch('data/pressure_line.geojson')
+.then(r=>r.json())
+.then(d=>pressureLayer.addData(d));
+
+// ================= FIX: LAYERS CONTROL (IMPORTANT) =================
+setTimeout(()=>{
+
 L.control.layers(
 {
   "🛰 Imagery": imagery,
@@ -271,10 +281,34 @@ L.control.layers(
 }
 ).addTo(map);
 
-// ================= IMAGE FILTER =================
+map.invalidateSize();
+
+},500);
+
+// ================= FILTER =================
+window.filterUSE = function(){
+
+  const v = document.getElementById("useFilter").value;
+
+  khafjiLayer.clearLayers();
+
+  const filtered = (v==="all")
+    ? window._khafjiOriginal
+    : window._khafjiOriginal.filter(f =>
+        (f.properties?.USE || "").includes(v)
+      );
+
+  khafjiLayer.addData({
+    type:"FeatureCollection",
+    features:filtered
+  });
+
+};
+
+// ================= BRIGHTNESS =================
 function updateImagery(){
-let b=document.getElementById("brightness")?.value || 100;
-let c=document.getElementById("contrast")?.value || 100;
+let b=document.getElementById("brightness").value;
+let c=document.getElementById("contrast").value;
 
 document.querySelector(".leaflet-tile-pane").style.filter=
 `brightness(${b}%) contrast(${c}%)`;
@@ -283,7 +317,7 @@ document.querySelector(".leaflet-tile-pane").style.filter=
 document.getElementById("brightness").oninput=updateImagery;
 document.getElementById("contrast").oninput=updateImagery;
 
-// ================= TOGGLES =================
+// ================= UI =================
 window.toggleHeader=function(){
 let el=document.getElementById("headerContent");
 let a=document.getElementById("arrow");
@@ -295,23 +329,16 @@ el.style.display="none";a.innerHTML="▲";
 }
 }
 
-window.sidebarOpen=true;
-
 window.toggleSidebar=function(){
 const sidebar=document.getElementById("sidebar");
 const mapDiv=document.getElementById("map");
-const btn=document.getElementById("toggleBtn");
 
-if(window.sidebarOpen){
-sidebar.style.transform="translateX(-100%)";
-mapDiv.style.left="0px";
-btn.style.left="10px";
-window.sidebarOpen=false;
-}else{
-sidebar.style.transform="translateX(0)";
+if(sidebar.style.display==="none"){
+sidebar.style.display="block";
 mapDiv.style.left="340px";
-btn.style.left="350px";
-window.sidebarOpen=true;
+}else{
+sidebar.style.display="none";
+mapDiv.style.left="0px";
 }
 }
 
