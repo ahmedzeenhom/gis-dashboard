@@ -2,52 +2,39 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>GIS Stable Dashboard</title>
+<title>Khafji Enterprise GIS</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
-#brandBox{
-position:fixed;
-right:10px;
-bottom:10px;
-background:rgba(15,23,42,0.9);
-color:#fff;
-padding:10px 12px;
-border-radius:10px;
-z-index:999999;
-border:1px solid #38bdf8;
-font-size:12px;
-line-height:1.4;
-box-shadow:0 4px 15px rgba(0,0,0,0.3);
-}
 html,body{
-margin:0;height:100%;
-font-family:Arial;
+margin:0;
+height:100%;
+font-family:system-ui, Arial;
 overflow:hidden;
+background:#0b1220;
 }
 
 /* ================= LOADER ================= */
 #loader{
 position:fixed;
-width:100%;
-height:100%;
-background:#0f172a;
+inset:0;
+background:radial-gradient(circle,#0f172a,#000);
 display:flex;
 align-items:center;
 justify-content:center;
-z-index:99999;
 flex-direction:column;
+z-index:99999;
 }
 .loader-title{
 color:#38bdf8;
-font-size:28px;
-font-weight:bold;
+font-size:30px;
+font-weight:800;
 }
 .loader-sub{
-color:#fff;
-font-size:14px;
+color:#cbd5e1;
+font-size:13px;
 margin-top:6px;
 }
 
@@ -55,27 +42,40 @@ margin-top:6px;
 #sidebar{
 position:absolute;
 left:0;top:0;
-width:340px;height:100%;
-background:#0f172a;
+width:340px;
+height:100%;
+background:rgba(15,23,42,0.75);
+backdrop-filter: blur(12px);
 color:#fff;
-padding:12px;
+padding:14px;
 overflow:auto;
 z-index:1000;
+border-right:1px solid rgba(56,189,248,0.15);
 }
 
-/* ================= PROJECT TITLE (NEW - SAFE ADDITION) ================= */
+/* PROJECT TITLE */
 #projectTitle{
-font-size:16px;
+font-size:15px;
 font-weight:800;
 color:#38bdf8;
 margin-bottom:18px;
-line-height:1.6;
-text-shadow:0 0 10px rgba(56,189,248,0.4);
-padding:8px 6px;
-border-left:4px solid #38bdf8;
+padding:10px;
+border-left:3px solid #38bdf8;
+line-height:1.5;
 }
 
-/* ================= MAP ================= */
+/* INPUTS */
+select,input{
+width:100%;
+padding:10px;
+margin:8px 0;
+border-radius:8px;
+border:1px solid rgba(255,255,255,0.08);
+background:#111827;
+color:#fff;
+}
+
+/* MAP */
 #map{
 position:absolute;
 left:340px;
@@ -84,45 +84,36 @@ right:0;
 bottom:0;
 }
 
-/* ================= BRAND ================= */
-.brand{
+/* BRAND */
+#brandBox{
 position:fixed;
-right:10px;
-bottom:35px;
-background:#0f172a;
+right:12px;
+bottom:12px;
+background:rgba(15,23,42,0.9);
 color:#fff;
-padding:10px;
+padding:10px 12px;
 border-radius:10px;
-z-index:9999;
+z-index:999999;
 border:1px solid #38bdf8;
 font-size:12px;
 }
 
-/* ================= LEGEND ================= */
+/* LEGEND */
 .legend{
 position:absolute;
-bottom:10px;
+bottom:12px;
 left:350px;
-background:#fff;
+background:rgba(255,255,255,0.95);
 padding:10px;
-border-radius:8px;
+border-radius:10px;
 font-size:12px;
 z-index:9999;
 }
 
-/* ================= LAYER CONTROL FIX ================= */
+/* LAYER CONTROL FIX */
 .leaflet-top,
 .leaflet-right{
 z-index:99999 !important;
-}
-
-/* ================= INPUT FIX ================= */
-select,input{
-width:100%;
-padding:10px;
-margin:8px 0;
-font-size:14px;
-border-radius:6px;
 }
 </style>
 </head>
@@ -135,12 +126,17 @@ border-radius:6px;
 <div class="loader-sub">GIS SPECIALIST</div>
 </div>
 
+<!-- BRAND -->
+<div id="brandBox">
+AHMED ZEEN<br>
+GIS SPECIALIST
+</div>
+
 <!-- SIDEBAR -->
 <div id="sidebar">
 
-<!-- PROJECT TITLE (SAFE ADDITION ABOVE LAND USE) -->
 <div id="projectTitle">
-🌍 مشروع الدراسات والتصاميم  بمحافظة الخفجي
+🌍 مشروع الدراسات والتصاميم للسيول بمحافظة الخفجي
 </div>
 
 <h3>استخدامات الأراضي</h3>
@@ -174,12 +170,10 @@ border-radius:6px;
 </div>
 
 <div id="map"></div>
-
 <div class="legend" id="legend"></div>
 
 <script>
 
-/* ================= MAP ================= */
 const map = L.map('map').setView([28.4,48.5],13);
 
 /* BASEMAP */
@@ -190,7 +184,7 @@ const imagery = L.tileLayer(
 /* DATA */
 let K=[],N=[],P=[];
 
-/* COLORS */
+/* COLOR */
 function getColor(v){
 if(!v) return "#999";
 if(v.includes("سكني")) return "#f1c40f";
@@ -201,7 +195,7 @@ if(v.includes("المرافق")) return "#2c3e50";
 return "#95a5a6";
 }
 
-/* LAND LAYER */
+/* LAYERS */
 let landLayer = L.geoJSON(null,{
 style:f=>({
 fillColor:getColor(f.properties.USE),
@@ -211,11 +205,8 @@ fillOpacity:0.6
 })
 }).addTo(map);
 
-/* NETWORK */
-let networkLayer = L.geoJSON(null,{style:{color:"red"}}).addTo(map);
-
-/* PRESSURE */
-let pressureLayer = L.geoJSON(null,{style:{color:"black"}}).addTo(map);
+let networkLayer = L.geoJSON(null,{style:{color:"red",weight:2}}).addTo(map);
+let pressureLayer = L.geoJSON(null,{style:{color:"black",weight:2}}).addTo(map);
 
 /* LOAD DATA */
 fetch('data/alkhafje.geojson').then(r=>r.json()).then(d=>{
@@ -319,9 +310,6 @@ loader.style.display="none";
 };
 
 </script>
-<div id="brandBox">
-  AHMED ZEEN<br>
-  <small>GIS SPECIALIST</small>
-</div>
+
 </body>
 </html>
