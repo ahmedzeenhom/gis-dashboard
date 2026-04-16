@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Khafji GIS Engine Stable</title>
+<title>Unbreakable GIS UI v1</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -21,20 +21,20 @@ background:#050814;
 position:absolute;
 left:0;
 top:0;
-width:340px;
+width:380px;
 height:100%;
-background:linear-gradient(180deg,#020617,#0b1220);
-color:#e2e8f0;
+background:linear-gradient(180deg,#070b18,#0b1220);
+color:#e5e7eb;
 padding:14px;
 overflow:auto;
-border-right:1px solid rgba(56,189,248,0.25);
+border-right:2px solid rgba(56,189,248,0.25);
 z-index:1000;
 }
 
 /* MAP */
 #map{
 position:absolute;
-left:340px;
+left:380px;
 top:0;
 right:0;
 bottom:0;
@@ -44,115 +44,111 @@ bottom:0;
 #projectTitle{
 position:absolute;
 top:10px;
-left:360px;
-z-index:9999;
+left:400px;
+z-index:99999;
 background:#020617;
 color:#38bdf8;
 padding:10px 14px;
 border-left:4px solid #38bdf8;
+border-radius:10px;
 font-weight:800;
-border-radius:8px;
-box-shadow:0 3px 10px rgba(0,0,0,0.4);
+}
+
+/* BRAND (LOCKED) */
+#brandBox{
+position:fixed;
+right:12px;
+bottom:12px;
+z-index:99999;
+background:#020617;
+color:#fff;
+border:1px solid #38bdf8;
+padding:10px;
+border-radius:10px;
+font-size:12px;
+}
+
+/* UI BLOCKS */
+.section-header{
+margin-top:12px;
+padding:10px;
+background:rgba(255,255,255,0.04);
+border-radius:10px;
+border:1px solid rgba(255,255,255,0.06);
+}
+
+.section-header h3{
+margin:0;
+font-size:13px;
+color:#38bdf8;
+}
+
+.section-content{
+padding:10px;
+margin-top:6px;
+background:rgba(255,255,255,0.02);
+border-radius:10px;
+border:1px solid rgba(255,255,255,0.05);
 }
 
 /* INPUTS */
 select,input{
 width:100%;
 padding:10px;
-margin:6px 0;
-background:#0f172a;
+margin-top:6px;
+background:#0b1220;
 color:#fff;
-border-radius:8px;
-border:1px solid rgba(255,255,255,0.1);
-}
-
-/* BRAND */
-#brandBox{
-position:fixed;
-right:12px;
-bottom:12px;
-background:#020617;
-border:1px solid #38bdf8;
-color:#fff;
-padding:10px;
 border-radius:10px;
-font-size:12px;
-z-index:9999;
+border:1px solid rgba(255,255,255,0.08);
 }
 
-/* FIX LAYER CONTROL */
-.leaflet-top,.leaflet-right{
+/* LAYERS FIX */
+.leaflet-control{
 z-index:99999 !important;
 }
+
+.leaflet-top.leaflet-right{
+z-index:99999 !important;
+}
+
 </style>
 </head>
 
 <body>
 
-<!-- MAP TITLE -->
-<div id="projectTitle">
-مشروع الدراسات والتصاميم بمحافظة الخفجي
-</div>
+<!-- TITLE -->
+<div id="projectTitle">مشروع الخفجي GIS</div>
+
+<!-- BRAND (UNBREAKABLE) -->
+<div id="brandBox">AHMED ZEEN<br>GIS SPECIALIST</div>
 
 <!-- SIDEBAR -->
-<div id="sidebar">
+<div id="sidebar"></div>
 
-<h3>🌍 Land Use</h3>
-<select id="useFilter" onchange="filterUSE()">
-<option value="all">All</option>
-<option>سكني</option>
-<option>تجاري</option>
-<option>صناعي</option>
-<option>خدمات</option>
-<option>المرافق</option>
-</select>
-
-<h3>🌐 Networks</h3>
-<select id="networkFilter" onchange="filterNetwork(this.value)">
-<option value="all">All</option>
-</select>
-
-<h3>💧 Pressure</h3>
-<select id="pressureFilter" onchange="filterPressure(this.value)">
-<option value="all">All</option>
-</select>
-
-<h3>⚡ Electric Stations</h3>
-<select id="electricFilter" onchange="filterElectric(this.value)">
-<option value="all">All</option>
-<option value="1">قائمة</option>
-<option value="3">مقترحة</option>
-</select>
-
-<h3>🖼 Imagery</h3>
-<label>Brightness</label>
-<input type="range" id="b" min="50" max="150" value="100">
-
-<label>Contrast</label>
-<input type="range" id="c" min="50" max="150" value="100">
-
-</div>
-
+<!-- MAP -->
 <div id="map"></div>
-
-<div id="brandBox">
-AHMED ZEEN<br>GIS ENGINE
-</div>
 
 <script>
 
+/* ================= MAP ================= */
 const map = L.map('map').setView([28.4,48.5],13);
 
 const imagery = L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 ).addTo(map);
 
-/* DATA */
+/* ================= DATA ================= */
 let K=[],N=[],P=[],E=[];
 
-/* COLOR */
+/* ================= LAYERS ================= */
+let landLayer=L.geoJSON(null).addTo(map);
+let networkLayer=L.geoJSON(null,{style:{color:"#ff0000",weight:2}}).addTo(map);
+let pressureLayer=L.geoJSON(null,{style:{color:"#000",weight:2}}).addTo(map);
+let electricLayer=L.geoJSON(null).addTo(map);
+
+/* ================= COLORS ================= */
 function color(v){
-v=String(v||"").trim();
+v=String(v||"");
 if(v.includes("سكني")) return "#facc15";
 if(v.includes("تجاري")) return "#ef4444";
 if(v.includes("صناعي")) return "#a855f7";
@@ -161,182 +157,110 @@ if(v.includes("المرافق")) return "#22c55e";
 return "#64748b";
 }
 
-/* LAND */
-let landLayer=L.geoJSON(null,{
-style:f=>({
-fillColor:color(f.properties?.USE),
-color:"#0b1220",
-weight:1,
-fillOpacity:0.65
-})
-}).addTo(map);
-
-/* NETWORK */
-let networkLayer=L.geoJSON(null,{
-style:{color:"#ff0000",weight:2}
-}).addTo(map);
-
-/* PRESSURE */
-let pressureLayer=L.geoJSON(null,{
-style:{color:"#000000",weight:2}
-}).addTo(map);
-
-/* GOOGLE PIN */
+/* ================= ELECTRIC ICON ================= */
 function pin(status){
-
-let v = String(status ?? "").trim();
-
-let isExisting =
-v === "1" ||
-v.includes("قائم") ||
-v.toLowerCase().includes("existing");
-
-let isProposed =
-v === "3" ||
-v.includes("مقترح") ||
-v.toLowerCase().includes("proposed");
-
-let color;
-let glow;
-
-if(isExisting){
-color = "#00ff6a";
-glow  = "0 0 18px rgba(0,255,106,0.9)";
-}
-else if(isProposed){
-color = "#ff2d2d";
-glow  = "0 0 18px rgba(255,45,45,0.9)";
-}
-else{
-color = "#ff9800";
-glow  = "0 0 12px rgba(255,152,0,0.7)";
-}
+let ok=String(status)==="1";
+let c=ok?"#00ff6a":"#ff1744";
 
 return L.divIcon({
-className:"",
 html:`
-<div style="position:relative;">
-
-<!-- PULSE RINGS -->
+<div style="position:relative">
 <div style="
-position:absolute;
-width:70px;
-height:70px;
-top:-18px;
-left:-18px;
-border-radius:50%;
-background:${color};
-opacity:0.25;
-animation:pulse 1.8s infinite;
-"></div>
-
-<div style="
-position:absolute;
-width:50px;
-height:50px;
-top:-8px;
-left:-8px;
-border-radius:50%;
-background:${color};
-opacity:0.35;
-animation:pulse 1.8s infinite;
-"></div>
-
-<!-- MAIN PIN -->
-<div style="
-width:52px;
-height:52px;
-background:${color};
+width:56px;height:56px;
+background:${c};
 border-radius:50% 50% 50% 0;
 transform:rotate(-45deg);
-border:4px solid white;
-box-shadow:${glow};
+border:5px solid white;
+box-shadow:0 10px 20px rgba(0,0,0,0.6);
 "></div>
-
-<!-- CENTER DOT -->
 <div style="
 position:absolute;
-top:18px;
-left:18px;
-width:14px;
-height:14px;
+top:20px;left:20px;
+width:14px;height:14px;
 background:white;
 border-radius:50%;
 "></div>
-
 </div>
-
-<style>
-@keyframes pulse{
-0%{transform:scale(0.6); opacity:0.35;}
-70%{transform:scale(1); opacity:0;}
-100%{transform:scale(1); opacity:0;}
-}
-</style>
 `,
-iconSize:[60,60],
-iconAnchor:[30,60]
-});
-}/* ELECTRIC */
-let electricLayer=L.geoJSON(null,{
-pointToLayer:(f,latlng)=>{
-return L.marker(latlng,{
-icon:pin(f.properties.StructureStatus)
+iconSize:[56,56],
+iconAnchor:[28,56]
 });
 }
-}).addTo(map);
 
-/* LAYERS CONTROL */
-L.control.layers(
-{"Imagery":imagery},
-{
-"Land Use":landLayer,
-"Network":networkLayer,
-"Pressure":pressureLayer,
-"Electric":electricLayer
-},
-{collapsed:false}
-).addTo(map);
-
-/* LOAD DATA */
-fetch('data/alkhafje.geojson').then(r=>r.json()).then(d=>{
-K=d.features;
-landLayer.addData(d);
-map.fitBounds(landLayer.getBounds());
-});
-
-fetch('data/alkhafje-network.json').then(r=>r.json()).then(d=>{
-N=d.features;
-networkLayer.addData(d);
-buildNetwork();
-});
-
-fetch('data/pressure_line.geojson').then(r=>r.json()).then(d=>{
-P=d.features;
-pressureLayer.addData(d);
-buildPressure();
-});
-
-fetch('data/electric.geojson').then(r=>r.json()).then(d=>{
-E=d.features;
-electricLayer.addData(d);
-});
-
-/* FILTERS */
-function filterUSE(){
-let v=useFilter.value;
+/* ================= SAFE RENDER ================= */
+function renderLand(data){
 landLayer.clearLayers();
 landLayer.addData({
 type:"FeatureCollection",
-features:v==="all"?K:K.filter(x=>String(x.properties.USE).includes(v))
-});
+features:data
+}).setStyle(f=>({
+fillColor:color(f.properties.USE),
+color:"#111",
+weight:1,
+fillOpacity:0.6
+}));
+}
+
+/* ================= UNBREAKABLE UI BUILDER ================= */
+function buildUI(){
+
+document.getElementById("sidebar").innerHTML = `
+
+<div class="section-header">
+<h3>استخدامات الاراضي</h3>
+<select id="useFilter" onchange="filterUSE()">
+<option value="all">All</option>
+<option>سكني</option>
+<option>تجاري</option>
+<option>صناعي</option>
+<option>خدمات</option>
+<option>المرافق</option>
+</select>
+</div>
+
+<div class="section-header">
+<h3>الشبكات</h3>
+<select id="networkFilter" onchange="filterNetwork(this.value)">
+<option value="all">All</option>
+</select>
+</div>
+
+<div class="section-header">
+<h3>خطوط الطرد</h3>
+<select id="pressureFilter" onchange="filterPressure(this.value)">
+<option value="all">All</option>
+</select>
+</div>
+
+<div class="section-header">
+<h3>محطات الرفع</h3>
+<select id="electricFilter" onchange="filterElectric(this.value)">
+<option value="all">All</option>
+<option value="1">🟢 قائمة</option>
+<option value="3">🔴 مقترحة</option>
+</select>
+</div>
+
+<div class="section-header">
+<h3>السطوع والتباين</h3>
+<input type="range" id="b" min="50" max="150" value="100">
+<input type="range" id="c" min="50" max="150" value="100">
+</div>
+
+`;
+}
+
+/* ================= SAFE FILTERS ================= */
+function filterUSE(){
+let v=useFilter.value;
+renderLand(v==="all"?K:K.filter(x=>String(x.properties.USE).includes(v)));
 }
 
 function filterNetwork(v){
 networkLayer.clearLayers();
 networkLayer.addData({
 type:"FeatureCollection",
-features:v==="all"?N:N.filter(x=>String(x.properties.NO)==v)
+features: v==="all"?N:N.filter(x=>String(x.properties.NO)==v)
 });
 }
 
@@ -344,46 +268,103 @@ function filterPressure(v){
 pressureLayer.clearLayers();
 pressureLayer.addData({
 type:"FeatureCollection",
-features:v==="all"?P:P.filter(x=>String(x.properties.des)==v)
+features: v==="all"?P:P.filter(x=>String(x.properties.des)==v)
 });
 }
 
 function filterElectric(v){
 electricLayer.clearLayers();
-
-let filtered;
-
-if(v==="all") filtered=E;
-else if(v==="1") filtered=E.filter(x=>String(x.properties.StructureStatus)=="1");
-else filtered=E.filter(x=>String(x.properties.StructureStatus)=="3");
-
 electricLayer.addData({
 type:"FeatureCollection",
-features:filtered
+features: v==="all"?E:E.filter(x=>String(x.properties.StructureStatus)==v)
 });
 }
 
-/* DROPDOWNS */
-function buildNetwork(){
-let vals=[...new Set(N.map(x=>parseInt(x.properties.NO)))].sort((a,b)=>a-b);
-networkFilter.innerHTML="<option value='all'>All</option>";
-vals.forEach(v=>networkFilter.innerHTML+=`<option>${v}</option>`);
+/* ================= DROPDOWN AUTO FIX ================= */
+function buildDropdowns(){
+
+networkFilter.innerHTML=`<option value="all">All</option>`;
+[...new Set(N.map(x=>x.properties.NO))].forEach(v=>{
+networkFilter.innerHTML+=`<option value="${v}">${v}</option>`;
+});
+
+pressureFilter.innerHTML=`<option value="all">All</option>`;
+[...new Set(P.map(x=>x.properties.des))].forEach(v=>{
+pressureFilter.innerHTML+=`<option value="${v}">${v}</option>`;
+});
 }
 
-function buildPressure(){
-let vals=[...new Set(P.map(x=>parseInt(x.properties.des)))].sort((a,b)=>a-b);
-pressureFilter.innerHTML="<option value='all'>All</option>";
-vals.forEach(v=>pressureFilter.innerHTML+=`<option>${v}</option>`);
-}
+/* ================= BRIGHTNESS SAFE ================= */
+function bindBrightness(){
 
-/* BRIGHTNESS */
-function updateImg(){
+function update(){
 document.querySelector(".leaflet-tile-pane").style.filter=
 `brightness(${b.value}%) contrast(${c.value}%)`;
 }
 
-b.oninput=updateImg;
-c.oninput=updateImg;
+b.oninput=update;
+c.oninput=update;
+}
+
+/* ================= LOAD DATA ================= */
+fetch('data/alkhafje.geojson')
+.then(r=>r.json())
+.then(d=>{
+K=d.features;
+renderLand(K);
+map.fitBounds(landLayer.getBounds());
+});
+
+fetch('data/alkhafje-network.json')
+.then(r=>r.json())
+.then(d=>{
+N=d.features;
+networkLayer.addData(d);
+buildDropdowns();
+});
+
+fetch('data/pressure_line.geojson')
+.then(r=>r.json())
+.then(d=>{
+P=d.features;
+pressureLayer.addData(d);
+buildDropdowns();
+});
+
+fetch('data/electric.geojson')
+.then(r=>r.json())
+.then(d=>{
+E=d.features;
+electricLayer.addData({
+type:"FeatureCollection",
+features:E
+});
+});
+
+/* ================= LAYERS CONTROL (UNBREAKABLE) ================= */
+function initLayers(){
+setTimeout(()=>{
+L.control.layers(
+{"Imagery":imagery},
+{
+"Land Use":landLayer,
+"Networks":networkLayer,
+"Pressure":pressureLayer,
+"Electric":electricLayer
+},
+{collapsed:false,position:"topright"}
+).addTo(map);
+},800);
+}
+
+/* ================= BOOT SYSTEM ================= */
+function boot(){
+buildUI();
+bindBrightness();
+initLayers();
+}
+
+boot();
 
 </script>
 
