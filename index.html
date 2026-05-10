@@ -5,9 +5,13 @@
 <title>Unbreakable GIS UI v1</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js">
+/* ===== AHMED MARK 28: نهاية JavaScript ===== */
+</script>
 
 <style>
+
+/* ===== AHMED MARK 01: بداية CSS - شكل الصفحة بالكامل ===== */
 html,body{
 margin:0;
 height:100%;
@@ -16,6 +20,7 @@ overflow:hidden;
 background:#050814;
 }
 
+/* ===== AHMED MARK 02: شكل القائمة الجانبية SIDEBAR ===== */
 /* SIDEBAR */
 #sidebar{
 position:absolute;
@@ -31,6 +36,7 @@ border-right:2px solid rgba(56,189,248,0.25);
 z-index:1000;
 }
 
+/* ===== AHMED MARK 03: مكان الخريطة MAP ===== */
 /* MAP */
 #map{
 position:absolute;
@@ -40,6 +46,7 @@ right:0;
 bottom:0;
 }
 
+/* ===== AHMED MARK 04: عنوان المشروع أعلى الخريطة ===== */
 /* PROJECT TITLE */
 #projectTitle{
 position:absolute;
@@ -54,6 +61,7 @@ border-radius:10px;
 font-weight:800;
 }
 
+/* ===== AHMED MARK 05: اسمك أسفل يمين الشاشة ===== */
 /* BRAND (LOCKED) */
 #brandBox{
 position:fixed;
@@ -68,6 +76,7 @@ border-radius:10px;
 font-size:12px;
 }
 
+/* ===== AHMED MARK 06: شكل كروت الفلاتر في الشمال ===== */
 /* UI BLOCKS */
 .section-header{
 margin-top:12px;
@@ -91,6 +100,7 @@ border-radius:10px;
 border:1px solid rgba(255,255,255,0.05);
 }
 
+/* ===== AHMED MARK 07: شكل القوائم والاختيارات ===== */
 /* INPUTS */
 select,input{
 width:100%;
@@ -102,6 +112,7 @@ border-radius:10px;
 border:1px solid rgba(255,255,255,0.08);
 }
 
+/* ===== AHMED MARK 08: مكان ظهور زرار الطبقات ===== */
 /* LAYERS FIX */
 .leaflet-control{
 z-index:99999 !important;
@@ -110,26 +121,128 @@ z-index:99999 !important;
 .leaflet-top.leaflet-right{
 z-index:99999 !important;
 }
+/* ===== AHMED EDIT 01: تحسين شكل صندوق الطبقات يمين فوق ===== */
+.leaflet-control-layers{
+background:rgba(2,6,23,0.95) !important;
+color:#ffffff !important;
+border-radius:14px !important;
+padding:12px !important;
+border:1px solid rgba(56,189,248,0.45) !important;
+box-shadow:0 10px 25px rgba(0,0,0,0.45) !important;
+font-size:14px !important;
+line-height:1.8 !important;
+}
+
+.leaflet-control-layers label{
+color:#ffffff !important;
+margin-bottom:6px !important;
+cursor:pointer;
+}
+
+.leaflet-control-layers input{
+width:auto !important;
+margin-left:6px !important;
+accent-color:#38bdf8;
+}
+
+.leaflet-control-layers-separator{
+border-top:1px solid rgba(56,189,248,0.35) !important;
+}
+/* ===== AHMED EDIT 02: شكل مفتاح الألوان Legend ===== */
+#legendBox{
+position:fixed;
+left:400px;
+bottom:18px;
+z-index:99999;
+background:rgba(2,6,23,0.94);
+color:#ffffff;
+border:1px solid rgba(56,189,248,0.45);
+border-radius:14px;
+padding:12px 14px;
+font-size:13px;
+box-shadow:0 10px 25px rgba(0,0,0,0.45);
+min-width:150px;
+}
+
+#legendBox .legend-title{
+font-weight:800;
+color:#38bdf8;
+margin-bottom:8px;
+border-bottom:1px solid rgba(56,189,248,0.3);
+padding-bottom:6px;
+}
+
+#legendBox .legend-item{
+display:flex;
+align-items:center;
+gap:8px;
+margin:7px 0;
+}
+
+#legendBox .legend-color{
+width:16px;
+height:16px;
+border-radius:4px;
+border:1px solid rgba(255,255,255,0.5);
+display:inline-block;
+}
 
 </style>
 </head>
 
 <body>
 
+<!-- ===== AHMED MARK 10: عنوان المشروع في أعلى الخريطة ===== -->
 <!-- TITLE -->
 <div id="projectTitle">مشروع الخفجي GIS</div>
-
+<!-- ===== AHMED EDIT 08: زر الرجوع للمشروع في مكان مستقل ===== -->
+<!-- ===== AHMED MARK 11: صندوق اسم أحمد أسفل يمين ===== -->
 <!-- BRAND (UNBREAKABLE) -->
 <div id="brandBox">AHMED ZEEN<br>GIS SPECIALIST</div>
+<!-- ===== AHMED EDIT 05: زر الرجوع لحدود المشروع ===== -->
+<!-- ===== AHMED EDIT 02: مفتاح ألوان استخدامات الأراضي ===== -->
+<div id="legendBox">
+  <div class="legend-title">مفتاح الألوان</div>
 
+  <div class="legend-item">
+    <span class="legend-color" style="background:#facc15"></span>
+    <span>سكني</span>
+  </div>
+
+  <div class="legend-item">
+    <span class="legend-color" style="background:#ef4444"></span>
+    <span>تجاري</span>
+  </div>
+
+  <div class="legend-item">
+    <span class="legend-color" style="background:#a855f7"></span>
+    <span>صناعي</span>
+  </div>
+
+  <div class="legend-item">
+    <span class="legend-color" style="background:#38bdf8"></span>
+    <span>خدمات</span>
+  </div>
+
+  <div class="legend-item">
+    <span class="legend-color" style="background:#22c55e"></span>
+    <span>المرافق</span>
+  </div>
+</div>
+
+<!-- ===== AHMED MARK 12: القائمة الجانبية اليسار ===== -->
 <!-- SIDEBAR -->
 <div id="sidebar"></div>
 
+<!-- ===== AHMED MARK 13: مكان الخريطة ===== -->
 <!-- MAP -->
 <div id="map"></div>
 
 <script>
 
+/* ===== AHMED MARK 14: بداية JavaScript - وظائف الخريطة ===== */
+
+/* ===== AHMED MARK 15: إعداد الخريطة ومكان البداية ===== */
 /* ================= MAP ================= */
 const map = L.map('map').setView([28.4,48.5],13);
 
@@ -137,26 +250,132 @@ const imagery = L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 ).addTo(map);
 
+/* ===== AHMED MARK 16: أماكن تخزين بيانات الطبقات بعد التحميل ===== */
 /* ================= DATA ================= */
 let K=[],N=[],P=[],E=[];
 
+/* ===== AHMED MARK 17: تعريف طبقات الخريطة ===== */
 /* ================= LAYERS ================= */
 let landLayer=L.geoJSON(null).addTo(map);
-let networkLayer=L.geoJSON(null,{style:{color:"#ff0000",weight:2}}).addTo(map);
-let pressureLayer=L.geoJSON(null,{style:{color:"#000",weight:2}}).addTo(map);
-let electricLayer=L.geoJSON(null).addTo(map);
+/* ===== AHMED EDIT 04: Popups للشبكات وخطوط الطرد ومحطات الرفع ===== */
 
+let networkLayer=L.geoJSON(null,{
+style:{color:"#ff0000",weight:2},
+onEachFeature:function(f,l){
+
+let p=f.properties || {};
+let no=p.NO || "غير معروف";
+
+l.bindPopup(`
+<div style="direction:rtl;text-align:right;min-width:200px">
+    <h3 style="margin:0 0 8px;color:#0f172a">بيانات الشبكة</h3>
+    <div><b>رقم الشبكة:</b> ${no}</div>
+</div>
+`);
+
+}
+}).addTo(map);
+
+
+let pressureLayer=L.geoJSON(null,{
+style:{color:"#000",weight:2},
+onEachFeature:function(f,l){
+
+let p=f.properties || {};
+let des=p.des || "غير معروف";
+
+l.bindPopup(`
+<div style="direction:rtl;text-align:right;min-width:200px">
+    <h3 style="margin:0 0 8px;color:#0f172a">بيانات خط الطرد</h3>
+    <div><b>الوصف:</b> ${des}</div>
+</div>
+`);
+
+}
+}).addTo(map);
+
+
+/* ===== AHMED EDIT 17: تلوين محطات الرفع حسب الحالة ===== */
+function electricColor(status){
+status = String(status || "").trim();
+
+if(status === "1"){
+    return "#22c55e"; // قائمة - أخضر
+}
+
+if(status === "3"){
+    return "#ef4444"; // مقترحة - أحمر
+}
+
+return "#38bdf8"; // غير معروف - أزرق
+}
+
+let electricLayer=L.geoJSON(null,{
+style:function(f){
+let status = f.properties ? f.properties.StructureStatus : "";
+
+return {
+color:electricColor(status),
+fillColor:electricColor(status),
+weight:3,
+fillOpacity:0.65
+};
+},
+
+pointToLayer:function(f,latlng){
+let status = f.properties ? f.properties.StructureStatus : "";
+
+return L.circleMarker(latlng,{
+radius:9,
+color:electricColor(status),
+fillColor:electricColor(status),
+weight:3,
+fillOpacity:0.9
+});
+},
+
+onEachFeature:function(f,l){
+
+let p=f.properties || {};
+let status=p.StructureStatus || "غير معروف";
+
+let statusText="غير معروف";
+
+if(String(status)==="1"){
+statusText="🟢 قائمة";
+}
+
+if(String(status)==="3"){
+statusText="🔴 مقترحة";
+}
+
+l.bindPopup(`
+<div style="direction:rtl;text-align:right;min-width:200px">
+    <h3 style="margin:0 0 8px;color:#0f172a">بيانات محطة الرفع</h3>
+    <div><b>الحالة:</b> ${statusText}</div>
+</div>
+`);
+
+}
+}).addTo(map);
+/* ===== AHMED MARK 18: ألوان استخدامات الأراضي ===== */
 /* ================= COLORS ================= */
+/* ===== AHMED EDIT 10: تحسين تصنيف ألوان استخدامات الأراضي ===== */
 function color(v){
-v=String(v||"");
-if(v.includes("سكني")) return "#facc15";
-if(v.includes("تجاري")) return "#ef4444";
-if(v.includes("صناعي")) return "#a855f7";
-if(v.includes("خدمات")) return "#38bdf8";
-if(v.includes("المرافق")) return "#22c55e";
+v=String(v||"").trim();
+
+/* أي قيمة فيها كلمة سكن تعتبر سكني، مثل: سكني عامة */
+if(v.includes("سكن")) return "#facc15";
+
+if(v.includes("تجار")) return "#ef4444";
+if(v.includes("صناع")) return "#a855f7";
+if(v.includes("خدم")) return "#38bdf8";
+if(v.includes("مرافق") || v.includes("المرافق")) return "#22c55e";
+
 return "#64748b";
 }
 
+/* ===== AHMED MARK 19: شكل أيقونات محطات الرفع ===== */
 /* ================= ELECTRIC ICON ================= */
 function pin(status){
 let ok=String(status)==="1";
@@ -187,13 +406,77 @@ iconAnchor:[28,56]
 });
 }
 
+/* ===== AHMED MARK 20: رسم طبقة استخدامات الأراضي ===== */
 /* ================= SAFE RENDER ================= */
 function renderLand(data){
 landLayer.clearLayers();
+
 landLayer.addData({
 type:"FeatureCollection",
 features:data
-}).setStyle(f=>({
+});
+/* ===== AHMED EDIT 05: دالة الرجوع لحدود المشروع ===== */
+/* ===== AHMED EDIT 14: إصلاح زر الرجوع لحدود المشروع بطريقة أقوى ===== */
+function zoomToProject(){
+
+let bounds = null;
+
+try{
+    if(K && K.length > 0){
+        bounds = L.geoJSON({
+            type:"FeatureCollection",
+            features:K
+        }).getBounds();
+    }
+}catch(e){
+    console.log("Zoom bounds error:", e);
+}
+
+if(bounds && bounds.isValid()){
+    map.fitBounds(bounds,{
+        padding:[40,40],
+        maxZoom:16
+    });
+}else{
+    alert("حدود المشروع لم يتم تحميلها بعد. انتظر ثواني وجرب مرة أخرى.");
+}
+
+}landLayer.eachLayer(function(layer){
+
+let useValue = layer.feature.properties.USE || "غير معروف";
+
+/* ===== AHMED EDIT 07: Popup أوضح لمعرفة سبب القطع غير الملونة ===== */
+layer.bindPopup(`
+<div style="direction:rtl;text-align:right;min-width:220px">
+    <h3 style="margin:0 0 8px;color:#0f172a">بيانات قطعة الأرض</h3>
+    <div><b>الاستخدام:</b> ${useValue}</div>
+    <hr>
+    <div style="font-size:12px;color:#334155">
+        لو القطعة المفروض سكني لكن مش صفراء، ابعتلي قيمة الاستخدام الظاهرة هنا.
+    </div>
+</div>
+`);
+layer.on("mouseover", function(){
+layer.setStyle({
+weight:3,
+color:"#ffffff",
+fillOpacity:0.9
+});
+});
+
+layer.on("mouseout", function(){
+/* ===== AHMED EDIT 16: منع رجوع القطع للشكل الأزرق الافتراضي ===== */
+layer.setStyle({
+fillColor:color(layer.feature.properties.USE),
+color:"#111",
+weight:1,
+fillOpacity:0.6
+});
+});
+
+});
+
+landLayer.setStyle(f=>({
 fillColor:color(f.properties.USE),
 color:"#111",
 weight:1,
@@ -201,6 +484,7 @@ fillOpacity:0.6
 }));
 }
 
+/* ===== AHMED MARK 21: محتوى القائمة الجانبية والفلاتر ===== */
 /* ================= UNBREAKABLE UI BUILDER ================= */
 function buildUI(){
 
@@ -250,6 +534,7 @@ document.getElementById("sidebar").innerHTML = `
 `;
 }
 
+/* ===== AHMED MARK 22: وظائف الفلاتر ===== */
 /* ================= SAFE FILTERS ================= */
 function filterUSE(){
 let v=useFilter.value;
@@ -272,14 +557,16 @@ features: v==="all"?P:P.filter(x=>String(x.properties.des)==v)
 });
 }
 
+/* ===== AHMED EDIT 18: فلتر محطات الرفع مع الحفاظ على الألوان ===== */
 function filterElectric(v){
 electricLayer.clearLayers();
+
 electricLayer.addData({
 type:"FeatureCollection",
 features: v==="all"?E:E.filter(x=>String(x.properties.StructureStatus)==v)
 });
 }
-
+/* ===== AHMED MARK 23: تعبئة القوائم تلقائي من البيانات ===== */
 /* ================= DROPDOWN AUTO FIX ================= */
 function buildDropdowns(){
 
@@ -294,6 +581,7 @@ pressureFilter.innerHTML+=`<option value="${v}">${v}</option>`;
 });
 }
 
+/* ===== AHMED MARK 24: السطوع والتباين ===== */
 /* ================= BRIGHTNESS SAFE ================= */
 function bindBrightness(){
 
@@ -306,6 +594,7 @@ b.oninput=update;
 c.oninput=update;
 }
 
+/* ===== AHMED MARK 25: تحميل ملفات البيانات من فولدر data ===== */
 /* ================= LOAD DATA ================= */
 fetch('data/alkhafje.geojson')
 .then(r=>r.json())
@@ -341,6 +630,7 @@ features:E
 });
 });
 
+/* ===== AHMED MARK 26: زرار الطبقات يمين فوق ===== */
 /* ================= LAYERS CONTROL (UNBREAKABLE) ================= */
 function initLayers(){
 setTimeout(()=>{
@@ -357,6 +647,7 @@ L.control.layers(
 },800);
 }
 
+/* ===== AHMED MARK 27: تشغيل النظام ===== */
 /* ================= BOOT SYSTEM ================= */
 function boot(){
 buildUI();
@@ -366,6 +657,8 @@ initLayers();
 
 boot();
 
+
+/* ===== AHMED MARK 28: نهاية JavaScript ===== */
 </script>
 
 </body>
