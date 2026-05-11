@@ -407,7 +407,7 @@ const imagery = L.tileLayer(
 const hillshadeLayer = L.tileLayer(
   'tiles/{z}/{x}/{y}.png',
   {
-    opacity: 1,
+    opacity: 0.45,
     attribution: 'Hillshade',
     minZoom: 10,
     maxNativeZoom: 17,
@@ -427,6 +427,8 @@ const demLayer = L.tileLayer(
 );
 // ===== AHMED EDIT 39-A: Show DEM Layer On Map =====
 demLayer.addTo(map);
+// ===== AHMED EDIT 40: Keep DEM above Hillshade =====
+demLayer.bringToFront();
 ;/* ===== AHMED MARK 16: أماكن تخزين بيانات الطبقات بعد التحميل ===== */
 /* ================= DATA ================= */
 let K=[],N=[],P=[],E=[];
