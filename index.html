@@ -403,13 +403,31 @@ const imagery = L.tileLayer(
 /* ===== AHMED EDIT 36-A: إضافة طبقة Hillshade من XYZ Tiles ===== */
 /* ===== AHMED EDIT 37: منع اختفاء Hillshade بعد مستوى الزووم المتاح ===== */
 /* ===== AHMED EDIT 37: Hillshade Tiles بجودة أعلى حتى زووم 17 ===== */
-const hillshadeLayer = L.tileLayer('tiles/{z}/{x}/{y}.png', {
-opacity: 1,
-attribution: 'Hillshade',
-minZoom: 10,
-maxNativeZoom: 17,
-maxZoom: 20
-});/* ===== AHMED MARK 16: أماكن تخزين بيانات الطبقات بعد التحميل ===== */
+// ===== AHMED EDIT 37: Hillshade Tiles =====
+const hillshadeLayer = L.tileLayer(
+  'tiles/{z}/{x}/{y}.png',
+  {
+    opacity: 1,
+    attribution: 'Hillshade',
+    minZoom: 10,
+    maxNativeZoom: 17,
+    maxZoom: 20
+  }
+);
+
+// ===== AHMED EDIT 39: DEM Layer =====
+const demLayer = L.tileLayer(
+  'https://ahmedzeenhom.github.io/gis-dashboard/dem/{z}/{x}/{y}.png',
+  {
+    attribution: 'DEM',
+    opacity: 0.65,
+    maxZoom: 16,
+    maxNativeZoom: 16
+  }
+);
+// ===== AHMED EDIT 39-A: Show DEM Layer On Map =====
+demLayer.addTo(map);
+;/* ===== AHMED MARK 16: أماكن تخزين بيانات الطبقات بعد التحميل ===== */
 /* ================= DATA ================= */
 let K=[],N=[],P=[],E=[];
 
@@ -804,9 +822,9 @@ null,
 "Networks":networkLayer,
 "Pressure":pressureLayer,
 "Electric":electricLayer,
+"DEM":demLayer,
 "Hillshade":hillshadeLayer
-},
-{
+},{
 collapsed:false,
 position:"topright"
 }
