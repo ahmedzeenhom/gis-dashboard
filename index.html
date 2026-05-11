@@ -280,7 +280,6 @@ font-weight:900 !important;
 }
 
 .leaflet-control-zoom a:hover{
-background:#0f172a !important;
 color:#ffffff !important;
 }
 background:#0f172a !important;
@@ -331,7 +330,6 @@ margin-top:2px;
 text-shadow:0 0 10px rgba(56,189,248,0.7);
 }
 </style>
-</style>
 </head>
 
 <!-- ===== AHMED EDIT 23: فتح الموقع والقائمة الجانبية مخفية تلقائيًا ===== -->
@@ -344,7 +342,8 @@ text-shadow:0 0 10px rgba(56,189,248,0.7);
 <div id="projectTitle">
   <div class="project-name">مشروع الخفجي</div>
   <div class="project-gis">GIS</div>
-</div></div><!-- ===== AHMED EDIT 21: زر إظهار وإخفاء القائمة ===== -->
+</div>
+<!-- ===== AHMED EDIT 21: زر إظهار وإخفاء القائمة ===== -->
 <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
 <!-- ===== AHMED EDIT 08: زر الرجوع للمشروع في مكان مستقل ===== -->
 <!-- ===== AHMED MARK 11: صندوق اسم أحمد أسفل يمين ===== -->
@@ -400,8 +399,17 @@ const map = L.map('map').setView([28.4,48.5],13);
 const imagery = L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 ).addTo(map);
-
-/* ===== AHMED MARK 16: أماكن تخزين بيانات الطبقات بعد التحميل ===== */
+/* ===== AHMED EDIT 38-A: خلفية فاضية لإخفاء الصورة الجوية ===== */
+/* ===== AHMED EDIT 36-A: إضافة طبقة Hillshade من XYZ Tiles ===== */
+/* ===== AHMED EDIT 37: منع اختفاء Hillshade بعد مستوى الزووم المتاح ===== */
+/* ===== AHMED EDIT 37: Hillshade Tiles بجودة أعلى حتى زووم 17 ===== */
+const hillshadeLayer = L.tileLayer('tiles/{z}/{x}/{y}.png', {
+opacity: 1,
+attribution: 'Hillshade',
+minZoom: 10,
+maxNativeZoom: 17,
+maxZoom: 20
+});/* ===== AHMED MARK 16: أماكن تخزين بيانات الطبقات بعد التحميل ===== */
 /* ================= DATA ================= */
 let K=[],N=[],P=[],E=[];
 
@@ -783,21 +791,29 @@ features:E
 
 /* ===== AHMED MARK 26: زرار الطبقات يمين فوق ===== */
 /* ================= LAYERS CONTROL (UNBREAKABLE) ================= */
+/* ===== AHMED EDIT 36-B: إضافة Hillshade لقائمة الطبقات بشكل آمن ===== */
+/* ===== AHMED EDIT 39: جعل Imagery طبقة اختيار عادية Checkbox ===== */
 function initLayers(){
 setTimeout(()=>{
+
 L.control.layers(
-{"Imagery":imagery},
+null,
 {
+"Imagery":imagery,
 "Land Use":landLayer,
 "Networks":networkLayer,
 "Pressure":pressureLayer,
-"Electric":electricLayer
+"Electric":electricLayer,
+"Hillshade":hillshadeLayer
 },
-{collapsed:false,position:"topright"}
+{
+collapsed:false,
+position:"topright"
+}
 ).addTo(map);
+
 },800);
 }
-
 /* ===== AHMED MARK 27: تشغيل النظام ===== */
 /* ================= BOOT SYSTEM ================= */
 /* ===== AHMED EDIT 22: وظيفة إظهار وإخفاء القائمة الجانبية ===== */
