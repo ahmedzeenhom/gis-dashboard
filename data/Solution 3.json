@@ -1,0 +1,4 @@
+{
+  "type" : "FeatureCollection",
+  "features" : [{"type":"Feature","id":1,"geometry":{"type":"LineString","coordinates":[[48.442946769244124,28.400304090134675],[48.452861902297172,28.399753025877288],[48.459641812764147,28.40478257641152]]},"properties":{"OBJECTID":1,"FID_":0,"Entity":"LWPolyline","Layer":"91067510-REF-50-PH03-CU-Drainage-N$0$Tunnel Drainage","Color":6,"Linetype":"Continuous","Elevation":0,"LineWt":0,"RefName":" ","no":"حاجز حماية","des":1988.42533828,"Shape_Length":1841.4894379534571,"SolutionID":3}}]
+}
