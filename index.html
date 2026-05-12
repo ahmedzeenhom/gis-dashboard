@@ -469,11 +469,12 @@ let K=[],N=[],P=[],E=[],D=[],B=[];
 let landLayer=L.geoJSON(null).addTo(map);
 // ===== AHMED EDIT 46-B: Districts Layer with Arabic Labels =====
 let districtLayer = L.geoJSON(null, {
-  style: {
+ style: {
     color: "#f97316",
     weight: 2,
     fillColor: "#000000",
-    fillOpacity: 0.02
+    fillOpacity: 0,
+    opacity: 0
   },
   onEachFeature: function (f, l) {
     const p = f.properties || {};
@@ -489,7 +490,7 @@ const nameAr = rawDistrictName === "بدون اسم" ? "" : rawDistrictName;
 
 if(nameAr){
   l.bindTooltip(nameAr, {
-    permanent: true,
+    permanent: false,
     direction: "center",
     className: "district-label"
   });
@@ -506,6 +507,37 @@ if(nameAr){
 });
 // ===== AHMED EDIT 46-I: Show Districts by default =====
 districtLayer.addTo(map);
+// ===== AHMED EDIT 50-A: Districts visible only after zoom in =====
+const districtsMinVisibleZoom = 13;
+
+function updateDistrictsVisibilityByZoom(){
+  if(map.getZoom() >= districtsMinVisibleZoom){
+    districtLayer.setStyle({
+      color: "#f97316",
+      weight: 2,
+      fillColor: "#000000",
+      fillOpacity: 0.02,
+      opacity: 1
+    });
+    districtLayer.eachLayer(function(layer){
+      if(layer.getTooltip()){
+        layer.openTooltip();
+      }
+    });
+  } else {
+    districtLayer.setStyle({
+      opacity: 0,
+      fillOpacity: 0
+    });
+    districtLayer.eachLayer(function(layer){
+      if(layer.getTooltip()){
+        layer.closeTooltip();
+      }
+    });
+  }
+}
+
+map.on("zoomend", updateDistrictsVisibilityByZoom);
 // ===== AHMED EDIT 48-G: Clean Boundary Layer =====
 let boundaryLayer = L.geoJSON(null,{
   interactive:false,
@@ -522,6 +554,20 @@ let boundaryLayer = L.geoJSON(null,{
 boundaryLayer.addTo(map);
 // ===== AHMED EDIT 48-B: Al Khafji boundary layer =====
 /* ===== AHMED EDIT 04: Popups للشبكات وخطوط الطرد ومحطات الرفع ===== */
+// ===== AHMED EDIT 51-A: Roads Layer =====
+let roadsLayer = L.geoJSON(null,{
+  style:function(){
+    return{
+      color:"#1a1a1a",
+           weight:1.4,
+           fillColor:"#6b7280",
+           fillOpacity:0.88,
+           opacity:1
+    };
+  }
+});
+// ===== AHMED EDIT 51-D: Show Roads by default =====
+roadsLayer.addTo(map);
 let networkLayer=L.geoJSON(null,{
 style:{color:"#ff0000",weight:2},
 onEachFeature:function(f,l){
@@ -877,7 +923,12 @@ renderLand(K);
 // ===== AHMED EDIT 49-A: Disabled old zoom to Land Use =====
 // map.fitBounds(landLayer.getBounds());
 });
-
+// ===== AHMED EDIT 51-B: Load Roads GeoJSON =====
+fetch('data/roads.geojson')
+.then(r=>r.json())
+.then(d=>{
+    roadsLayer.addData(d);
+});
 fetch('data/alkhafje-network.json')
 .then(r=>r.json())
 .then(d=>{
@@ -919,6 +970,8 @@ d.features = d.features.filter(f => {
 });
 
 districtLayer.addData(d);});
+// ===== AHMED EDIT 50-B: Apply districts zoom visibility after load =====
+updateDistrictsVisibilityByZoom();
 fetch('data/electric.geojson')
 .then(r=>r.json())
 .then(d=>{
@@ -989,6 +1042,7 @@ null,
 "Land Use":landLayer,
 "Districts":districtLayer,
 "Al Khafji Boundary":boundaryLayer,
+"Roads":roadsLayer,
 "Networks":networkLayer,
 "Pressure":pressureLayer,
 "Electric":electricLayer,
