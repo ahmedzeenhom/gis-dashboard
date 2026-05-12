@@ -149,7 +149,25 @@ box-shadow:0 10px 25px rgba(0,0,0,0.45) !important;
 font-size:14px !important;
 line-height:1.8 !important;
 }
+/* ===== AHMED EDIT 54-B: Hide all layers button style ===== */
+.hide-all-layers-box{
+margin-bottom:8px !important;
+}
 
+.hide-all-layers-box button{
+width:100%;
+background:#7f1d1d;
+color:#ffffff;
+border:1px solid rgba(248,113,113,0.7);
+border-radius:10px;
+padding:8px 10px;
+font-weight:900;
+cursor:pointer;
+}
+
+.hide-all-layers-box button:hover{
+background:#991b1b;
+}
 .leaflet-control-layers label{
 color:#ffffff !important;
 margin-bottom:6px !important;
@@ -824,7 +842,6 @@ fillOpacity:0.6
 function buildUI(){
 
 document.getElementById("sidebar").innerHTML = `
-
 <div class="section-header">
 <h3>استخدامات الاراضي</h3>
 <select id="useFilter" onchange="filterUSE()">
@@ -993,6 +1010,7 @@ l.bindPopup(`
 `);
       }
     }).addTo(solutionLayers);
+keepSolutionsOnTop();
   });
 });
 fetch('data/roads.geojson')
@@ -1106,6 +1124,25 @@ map.on('overlayadd overlayremove', updateLandUseLegendSafe);
 updateTerrainOpacityBox();
 // ===== AHMED EDIT 44-SAFE-C: Initial Land Use legend state =====
 updateLandUseLegendSafe();
+// ===== AHMED EDIT 53-G: Keep Engineering Solutions on top =====
+function keepSolutionsOnTop(){
+  solutionLayers.eachLayer(function(layer){
+    layer.bringToFront();
+  });
+}
+
+map.on('overlayadd overlayremove zoomend', keepSolutionsOnTop);
+keepSolutionsOnTop();
+// ===== AHMED EDIT 54-A: Hide all layers button inside layer control area =====
+const hideAllControl = L.control({ position: 'topright' });
+
+hideAllControl.onAdd = function(){
+  const div = L.DomUtil.create('div', 'leaflet-control-layers hide-all-layers-box');
+  div.innerHTML = `<button id="toggleAllLayersBtn" onclick="toggleAllOverlays()">إخفاء الطبقات</button>`;
+  L.DomEvent.disableClickPropagation(div);
+  return div;
+};
+
 L.control.layers(
 null,
 {
@@ -1125,12 +1162,57 @@ collapsed:false,
 position:"topright"
 }
 ).addTo(map);
+hideAllControl.addTo(map);
 
 },800);
 }
 /* ===== AHMED MARK 27: تشغيل النظام ===== */
 /* ================= BOOT SYSTEM ================= */
 /* ===== AHMED EDIT 22: وظيفة إظهار وإخفاء القائمة الجانبية ===== */
+// ===== AHMED EDIT 54-B: Hide all overlay layers except imagery =====
+function toggleAllOverlays(){
+if(typeof allLayersHidden === "undefined"){
+  window.allLayersHidden = false;
+}
+  const layers = [
+    landLayer,
+    districtLayer,
+    boundaryLayer,
+    roadsLayer,
+    solutionLayers,
+    networkLayer,
+    pressureLayer,
+    electricLayer,
+    demLayer,
+    hillshadeLayer
+  ];
+if(!window.allLayersHidden){
+  layers.forEach(function(layer){
+    if(map.hasLayer(layer)){
+      map.removeLayer(layer);
+    }
+  });
+window.allLayersHidden = true;
+document.getElementById("toggleAllLayersBtn").innerText = "إظهار الطبقات";
+return;
+}
+if(window.allLayersHidden){
+  layers.forEach(function(layer){
+    if(!map.hasLayer(layer)){
+      layer.addTo(map);
+    }
+  });
+
+  window.allLayersHidden = false;
+  document.getElementById("toggleAllLayersBtn").innerText = "إخفاء الطبقات";
+  keepSolutionsOnTop();
+
+  updateTerrainOpacityBox();
+  updateLandUseLegendSafe();
+}
+  updateTerrainOpacityBox();
+  updateLandUseLegendSafe();
+}
 function toggleSidebar(){
 document.body.classList.toggle("sidebar-hidden");
 
