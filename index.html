@@ -422,7 +422,10 @@ text-shadow:0 0 10px rgba(56,189,248,0.7);
 
 /* ===== AHMED MARK 15: إعداد الخريطة ومكان البداية ===== */
 /* ================= MAP ================= */
-const map = L.map('map').setView([28.4,48.5],13);
+const map = L.map('map', {
+  zoomSnap: 0.25,
+  zoomDelta: 0.25
+}).setView([28.4,48.5],13);
 
 const imagery = L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
@@ -871,7 +874,8 @@ fetch('data/alkhafje.geojson')
 .then(d=>{
 K=d.features;
 renderLand(K);
-map.fitBounds(landLayer.getBounds());
+// ===== AHMED EDIT 49-A: Disabled old zoom to Land Use =====
+// map.fitBounds(landLayer.getBounds());
 });
 
 fetch('data/alkhafje-network.json')
@@ -896,7 +900,15 @@ fetch('data/AL-khafje.geojson')
 .then(d=>{
     boundaryLayer.clearLayers();
     boundaryLayer.addData(d);
-});fetch('data/districts.geojson')
+
+    // ===== AHMED EDIT 49-B: Initial zoom to Al Khafji Boundary =====
+    // ===== AHMED EDIT 49-E: Delayed zoom to boundary after layer draw =====
+// ===== AHMED EDIT 49-G: Initial fixed zoom to Al Khafji =====
+setTimeout(function(){
+  map.setView([28.42, 48.49], 12.25);
+}, 300);
+});
+fetch('data/districts.geojson')
 .then(r=>r.json())
 .then(d=>{
   D=d.features;
