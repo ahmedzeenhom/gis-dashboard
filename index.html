@@ -453,13 +453,21 @@ text-shadow:0 0 10px rgba(56,189,248,0.7);
 /* ================= MAP ================= */
 const map = L.map('map', {
   zoomSnap: 0.25,
-  zoomDelta: 0.25
+  zoomDelta: 0.25,
+  minZoom: 7,
+  maxBounds: [
+    [23.0, 46.0],
+    [30.8, 51.5]
+  ],
+  maxBoundsViscosity: 1.0
 }).setView([28.4,48.5],13);
-
 const imagery = L.tileLayer(
-'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-).addTo(map);
-/* ===== AHMED EDIT 38-A: خلفية فاضية لإخفاء الصورة الجوية ===== */
+'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+{
+  noWrap:true,
+  bounds:[[-85,-180],[85,180]]
+}
+).addTo(map);/* ===== AHMED EDIT 38-A: خلفية فاضية لإخفاء الصورة الجوية ===== */
 /* ===== AHMED EDIT 36-A: إضافة طبقة Hillshade من XYZ Tiles ===== */
 /* ===== AHMED EDIT 37: منع اختفاء Hillshade بعد مستوى الزووم المتاح ===== */
 /* ===== AHMED EDIT 37: Hillshade Tiles بجودة أعلى حتى زووم 17 ===== */
