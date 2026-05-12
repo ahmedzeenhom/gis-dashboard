@@ -162,6 +162,17 @@ margin-left:6px !important;
 accent-color:#38bdf8;
 }
 /* ===== AHMED EDIT 46-C: District Arabic labels ===== */
+/* ===== AHMED EDIT 53-C: Engineering Solutions labels ===== */
+.solution-label{
+  background:rgba(2,6,23,0.82);
+  color:#ffffff;
+  border:1px solid rgba(255,255,255,0.45);
+  border-radius:8px;
+  padding:3px 8px;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:0 4px 12px rgba(0,0,0,0.35);
+}
 .district-label{
   background:rgba(2,6,23,0.75);
   color:#ffffff;
@@ -555,6 +566,24 @@ boundaryLayer.addTo(map);
 // ===== AHMED EDIT 48-B: Al Khafji boundary layer =====
 /* ===== AHMED EDIT 04: Popups للشبكات وخطوط الطرد ومحطات الرفع ===== */
 // ===== AHMED EDIT 51-A: Roads Layer =====
+// ===== AHMED EDIT 53-A: Engineering Solutions layers =====
+const solutionLayers = L.layerGroup().addTo(map);
+
+function solutionStyle(id){
+  const styles = {
+    1: "#2563eb",
+    2: "#ef4444",
+    3: "#f59e0b",
+    4: "#22c55e"
+  };
+
+  return {
+    color: styles[id] || "#ffffff",
+    weight: 6,
+    opacity: 1,
+    dashArray: "8,8"
+  };
+}
 let roadsLayer = L.geoJSON(null,{
   style:function(){
     return{
@@ -924,6 +953,53 @@ renderLand(K);
 // map.fitBounds(landLayer.getBounds());
 });
 // ===== AHMED EDIT 51-B: Load Roads GeoJSON =====
+// ===== AHMED EDIT 53-B: Load Engineering Solutions =====
+[
+  'data/Solution 1.json',
+  'data/Solution 2.json',
+  'data/Solution 3.json',
+  'data/Solution 4.json'
+].forEach(function(url){
+  fetch(url)
+  .then(r=>r.json())
+  .then(d=>{
+    L.geoJSON(d,{
+      style:function(f){
+        const id = f.properties.SolutionID;
+        return solutionStyle(id);
+      },
+      onEachFeature:function(f,l){
+        const id = f.properties.SolutionID || "";
+
+const solutionDescriptions = {
+  1: "انشاء عبارة طولية لتمديد القناة المفتوحة القائمة",
+  2: "انشاء حاجز توجيهي (تدبيش حجري) شرق الطريق الدولي بطول 3 كلم لتوجيه المياه باتجاه الجنوب",
+  3: "إنشاء حاجز توجيهي لتوجيه مسار المياه لامتداد العبارة الصندوقية المقترحة داخل النطاق العمراني",
+  4: "إنشاء حاجز توجيهي لتوجيه مسار المياه إلى الناحية الشرقية أراضي فضاء بطول 1 كلم"
+};
+
+l.bindTooltip("Solution " + id, {
+  permanent:true,
+  direction:"center",
+  className:"solution-label"
+});
+
+l.bindPopup(`
+  <div style="
+    direction:rtl;
+    text-align:right;
+    font-family:Arial;
+    min-width:220px;
+  ">
+    <b>Solution ${id}</b>
+    <hr style="margin:6px 0;">
+    ${solutionDescriptions[id] || "لا يوجد وصف"}
+  </div>
+`);
+      }
+    }).addTo(solutionLayers);
+  });
+});
 fetch('data/roads.geojson')
 .then(r=>r.json())
 .then(d=>{
@@ -1043,6 +1119,7 @@ null,
 "Districts":districtLayer,
 "Al Khafji Boundary":boundaryLayer,
 "Roads":roadsLayer,
+"Engineering Solutions":solutionLayers,
 "Networks":networkLayer,
 "Pressure":pressureLayer,
 "Electric":electricLayer,
