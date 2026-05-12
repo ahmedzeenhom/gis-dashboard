@@ -65,21 +65,19 @@ font-weight:800;
 /* BRAND (LOCKED) */
 /* ===== AHMED EDIT 47-B: Terrain legend floating position ===== */
 #terrainLegendBox{
-position:fixed;
-left:405px;
-bottom:115px;
+position:relative;
+left:auto;
+bottom:auto;
 z-index:99999;
-background:transparent;
-border:none;
-padding:0;padding:8px;
-box-shadow:none;display:none;
-}
+background:rgba(2,6,23,0.88);
+border:1px solid rgba(56,189,248,0.45);
+padding:6px;
+box-shadow:0 8px 20px rgba(0,0,0,0.35);}
 
 #terrainLegendBox img{
-width:70px;
+width:105px;
 display:block;
-mix-blend-mode:multiply;
-opacity:0.9;
+opacity:0.95;
 border-radius:8px;
 }
 #brandBox{
@@ -379,9 +377,6 @@ text-shadow:0 0 10px rgba(56,189,248,0.7);
 <!-- BRAND (UNBREAKABLE) -->
 <div id="brandBox">AHMED ZEEN<br>GIS SPECIALIST</div>
 <!-- ===== AHMED EDIT 47-A: Terrain legend floating on map ===== -->
-<div id="terrainLegendBox">
-  <img src="data/terrain-legend.png" alt="DEM and Hillshade Legend">
-</div>
 <!-- ===== AHMED EDIT 05: زر الرجوع لحدود المشروع ===== -->
 <!-- ===== AHMED EDIT 02: مفتاح ألوان استخدامات الأراضي ===== -->
 <div id="legendBox">
@@ -482,6 +477,10 @@ let districtLayer = L.geoJSON(null, {
   // ===== AHMED EDIT 46-H: Hide district label if ArabicName is empty =====
 // ===== AHMED EDIT 46-J: Treat empty / بدون اسم as no label =====
 const rawDistrictName = (p.ArabicName || "").trim();
+// ===== AHMED EDIT 46-L: Hide الحرس الوطني district =====
+if(rawDistrictName === "الحرس الوطني"){
+    return;
+}
 
 const nameAr = rawDistrictName === "بدون اسم" ? "" : rawDistrictName;
 
@@ -784,6 +783,8 @@ document.getElementById("sidebar").innerHTML = `
 
 <label>Hillshade opacity</label>
 <input type="range" id="hillshadeOpacity" min="0" max="1" step="0.05" value="0.45">
+<div id="terrainLegendBox">
+  <img src="data/terrain-legend.png" alt="DEM and Hillshade Legend">
 </div>
 
 `;
@@ -879,8 +880,13 @@ fetch('data/districts.geojson')
 .then(r=>r.json())
 .then(d=>{
   D=d.features;
-  districtLayer.addData(d);
+// ===== AHMED EDIT 46-M: Remove الحرس الوطني from districts =====
+d.features = d.features.filter(f => {
+    const n = (f.properties.ArabicName || "").trim();
+    return n !== "الحرس الوطني";
 });
+
+districtLayer.addData(d);});
 fetch('data/electric.geojson')
 .then(r=>r.json())
 .then(d=>{
