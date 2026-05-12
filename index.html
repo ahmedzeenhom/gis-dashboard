@@ -459,7 +459,7 @@ demLayer.addTo(map);
 demLayer.bringToFront();
 ;/* ===== AHMED MARK 16: أماكن تخزين بيانات الطبقات بعد التحميل ===== */
 /* ================= DATA ================= */
-let K=[],N=[],P=[],E=[],D=[];
+let K=[],N=[],P=[],E=[],D=[],B=[];
 
 /* ===== AHMED MARK 17: تعريف طبقات الخريطة ===== */
 /* ================= LAYERS ================= */
@@ -503,8 +503,22 @@ if(nameAr){
 });
 // ===== AHMED EDIT 46-I: Show Districts by default =====
 districtLayer.addTo(map);
-/* ===== AHMED EDIT 04: Popups للشبكات وخطوط الطرد ومحطات الرفع ===== */
+// ===== AHMED EDIT 48-G: Clean Boundary Layer =====
+let boundaryLayer = L.geoJSON(null,{
+  interactive:false,
+  style:function(){
+    return{
+      color:"#ffffff",
+      weight:2,
+      fillOpacity:0,
+      opacity:1
+    };
+  }
+});
 
+boundaryLayer.addTo(map);
+// ===== AHMED EDIT 48-B: Al Khafji boundary layer =====
+/* ===== AHMED EDIT 04: Popups للشبكات وخطوط الطرد ومحطات الرفع ===== */
 let networkLayer=L.geoJSON(null,{
 style:{color:"#ff0000",weight:2},
 onEachFeature:function(f,l){
@@ -876,7 +890,13 @@ pressureLayer.addData(d);
 buildDropdowns();
 });
 // ===== AHMED EDIT 46-D: Load Districts GeoJSON =====
-fetch('data/districts.geojson')
+// ===== AHMED EDIT 48-C: Load Al Khafji Boundary GeoJSON =====
+fetch('data/AL-khafje.geojson')
+.then(r=>r.json())
+.then(d=>{
+    boundaryLayer.clearLayers();
+    boundaryLayer.addData(d);
+});fetch('data/districts.geojson')
 .then(r=>r.json())
 .then(d=>{
   D=d.features;
@@ -956,6 +976,7 @@ null,
 "Imagery":imagery,
 "Land Use":landLayer,
 "Districts":districtLayer,
+"Al Khafji Boundary":boundaryLayer,
 "Networks":networkLayer,
 "Pressure":pressureLayer,
 "Electric":electricLayer,
