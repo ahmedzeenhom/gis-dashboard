@@ -615,8 +615,31 @@ let roadsLayer = L.geoJSON(null,{
 });
 // ===== AHMED EDIT 51-D: Show Roads by default =====
 roadsLayer.addTo(map);
+// ===== AHMED EDIT 55-A: Network colors by NO =====
+function networkColor(no){
+  no = String(no || "").trim();
+
+  const colors = {
+  "1": "#2563eb", // أزرق
+  "2": "#ef4444", // أحمر
+  "3": "#ffffff", // أبيض
+  "4": "#22c55e", // أخضر
+  "5": "#facc15", // أصفر
+  "6": "#a855f7", // بنفسجي
+  "7": "#fb923c"  // برتقالي
+};
+
+  return colors[no] || "#38bdf8";
+}
 let networkLayer=L.geoJSON(null,{
-style:{color:"#ff0000",weight:2},
+style:function(f){
+  const no = f.properties ? f.properties.NO : "";
+  return {
+    color: networkColor(no),
+    weight: 2.5,
+    opacity: 1
+  };
+},
 onEachFeature:function(f,l){
 
 let p=f.properties || {};
@@ -936,7 +959,9 @@ features: v==="all"?E:E.filter(x=>String(x.properties.StructureStatus)==v)
 function buildDropdowns(){
 
 networkFilter.innerHTML=`<option value="all">All</option>`;
-[...new Set(N.map(x=>x.properties.NO))].forEach(v=>{
+[...new Set(N.map(x=>x.properties.NO))]
+.sort((a,b)=>Number(a)-Number(b))
+.forEach(v=>{
 networkFilter.innerHTML+=`<option value="${v}">${v}</option>`;
 });
 
