@@ -710,6 +710,17 @@ document.getElementById("sidebar").innerHTML = `
 <input type="range" id="c" min="50" max="150" value="100">
 </div>
 
+<!-- ===== AHMED EDIT 42-F: DEM and Hillshade opacity sliders in sidebar ===== -->
+<div class="section-header" id="terrainOpacityBox" style="display:none;">
+<h3>شفافية التضاريس</h3>
+
+<label>DEM opacity</label>
+<input type="range" id="demOpacity" min="0" max="1" step="0.05" value="0.65">
+
+<label>Hillshade opacity</label>
+<input type="range" id="hillshadeOpacity" min="0" max="1" step="0.05" value="0.45">
+</div>
+
 `;
 }
 
@@ -813,9 +824,31 @@ features:E
 /* ================= LAYERS CONTROL (UNBREAKABLE) ================= */
 /* ===== AHMED EDIT 36-B: إضافة Hillshade لقائمة الطبقات بشكل آمن ===== */
 /* ===== AHMED EDIT 39: جعل Imagery طبقة اختيار عادية Checkbox ===== */
+// ===== AHMED EDIT 43-B: Show terrain opacity controls only when needed =====
+function updateTerrainOpacityBox(){
+  const box = document.getElementById('terrainOpacityBox');
+  if(!box) return;
+
+  if(map.hasLayer(demLayer) || map.hasLayer(hillshadeLayer)){
+    box.style.display = "block";
+  } else {
+    box.style.display = "none";
+  }
+}
 function initLayers(){
 setTimeout(()=>{
+// ===== AHMED EDIT 42-B: DEM opacity change =====
+document.getElementById('demOpacity').addEventListener('input', function () {
+  demLayer.setOpacity(Number(this.value));
+});
 
+// ===== AHMED EDIT 42-D: Hillshade opacity change =====
+document.getElementById('hillshadeOpacity').addEventListener('input', function () {
+  hillshadeLayer.setOpacity(Number(this.value));
+});
+// ===== AHMED EDIT 43-C: Watch terrain layer changes =====
+map.on('overlayadd overlayremove', updateTerrainOpacityBox);
+updateTerrainOpacityBox();
 L.control.layers(
 null,
 {
@@ -847,6 +880,14 @@ map.invalidateSize();
 function boot(){
 buildUI();
 bindBrightness();
+// ===== AHMED EDIT 42-G: Bind DEM and Hillshade opacity sliders =====
+document.getElementById('demOpacity').addEventListener('input', function () {
+  demLayer.setOpacity(Number(this.value));
+});
+
+document.getElementById('hillshadeOpacity').addEventListener('input', function () {
+  hillshadeLayer.setOpacity(Number(this.value));
+});
 initLayers();
 }
 
