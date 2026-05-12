@@ -63,6 +63,25 @@ font-weight:800;
 
 /* ===== AHMED MARK 05: اسمك أسفل يمين الشاشة ===== */
 /* BRAND (LOCKED) */
+/* ===== AHMED EDIT 47-B: Terrain legend floating position ===== */
+#terrainLegendBox{
+position:fixed;
+left:405px;
+bottom:115px;
+z-index:99999;
+background:transparent;
+border:none;
+padding:0;padding:8px;
+box-shadow:none;display:none;
+}
+
+#terrainLegendBox img{
+width:70px;
+display:block;
+mix-blend-mode:multiply;
+opacity:0.9;
+border-radius:8px;
+}
 #brandBox{
 position:fixed;
 right:12px;
@@ -144,7 +163,17 @@ width:auto !important;
 margin-left:6px !important;
 accent-color:#38bdf8;
 }
-
+/* ===== AHMED EDIT 46-C: District Arabic labels ===== */
+.district-label{
+  background:rgba(2,6,23,0.75);
+  color:#ffffff;
+  border:1px solid rgba(255,255,255,0.35);
+  border-radius:8px;
+  padding:3px 7px;
+  font-size:12px;
+  font-weight:800;
+  box-shadow:0 4px 12px rgba(0,0,0,0.35);
+}
 .leaflet-control-layers-separator{
 border-top:1px solid rgba(56,189,248,0.35) !important;
 }
@@ -349,6 +378,10 @@ text-shadow:0 0 10px rgba(56,189,248,0.7);
 <!-- ===== AHMED MARK 11: صندوق اسم أحمد أسفل يمين ===== -->
 <!-- BRAND (UNBREAKABLE) -->
 <div id="brandBox">AHMED ZEEN<br>GIS SPECIALIST</div>
+<!-- ===== AHMED EDIT 47-A: Terrain legend floating on map ===== -->
+<div id="terrainLegendBox">
+  <img src="data/terrain-legend.png" alt="DEM and Hillshade Legend">
+</div>
 <!-- ===== AHMED EDIT 05: زر الرجوع لحدود المشروع ===== -->
 <!-- ===== AHMED EDIT 02: مفتاح ألوان استخدامات الأراضي ===== -->
 <div id="legendBox">
@@ -431,11 +464,46 @@ demLayer.addTo(map);
 demLayer.bringToFront();
 ;/* ===== AHMED MARK 16: أماكن تخزين بيانات الطبقات بعد التحميل ===== */
 /* ================= DATA ================= */
-let K=[],N=[],P=[],E=[];
+let K=[],N=[],P=[],E=[],D=[];
 
 /* ===== AHMED MARK 17: تعريف طبقات الخريطة ===== */
 /* ================= LAYERS ================= */
 let landLayer=L.geoJSON(null).addTo(map);
+// ===== AHMED EDIT 46-B: Districts Layer with Arabic Labels =====
+let districtLayer = L.geoJSON(null, {
+  style: {
+    color: "#f97316",
+    weight: 2,
+    fillColor: "#000000",
+    fillOpacity: 0.02
+  },
+  onEachFeature: function (f, l) {
+    const p = f.properties || {};
+  // ===== AHMED EDIT 46-H: Hide district label if ArabicName is empty =====
+// ===== AHMED EDIT 46-J: Treat empty / بدون اسم as no label =====
+const rawDistrictName = (p.ArabicName || "").trim();
+
+const nameAr = rawDistrictName === "بدون اسم" ? "" : rawDistrictName;
+
+if(nameAr){
+  l.bindTooltip(nameAr, {
+    permanent: true,
+    direction: "center",
+    className: "district-label"
+  });
+
+}
+
+    l.bindPopup(`
+      <div style="direction:rtl;text-align:right;min-width:180px">
+        <h3 style="margin:0 0 8px;color:#0f172a">بيانات الحي</h3>
+        <div><b>اسم الحي:</b> ${nameAr || "غير معروف"}</div>
+      </div>
+    `);
+  }
+});
+// ===== AHMED EDIT 46-I: Show Districts by default =====
+districtLayer.addTo(map);
 /* ===== AHMED EDIT 04: Popups للشبكات وخطوط الطرد ومحطات الرفع ===== */
 
 let networkLayer=L.geoJSON(null,{
@@ -629,10 +697,7 @@ layer.bindPopup(`
 <div style="direction:rtl;text-align:right;min-width:220px">
     <h3 style="margin:0 0 8px;color:#0f172a">بيانات قطعة الأرض</h3>
     <div><b>الاستخدام:</b> ${useValue}</div>
-    <hr>
-    <div style="font-size:12px;color:#334155">
-        لو القطعة المفروض سكني لكن مش صفراء، ابعتلي قيمة الاستخدام الظاهرة هنا.
-    </div>
+    
 </div>
 `);
 layer.on("mouseover", function(){
@@ -809,7 +874,13 @@ P=d.features;
 pressureLayer.addData(d);
 buildDropdowns();
 });
-
+// ===== AHMED EDIT 46-D: Load Districts GeoJSON =====
+fetch('data/districts.geojson')
+.then(r=>r.json())
+.then(d=>{
+  D=d.features;
+  districtLayer.addData(d);
+});
 fetch('data/electric.geojson')
 .then(r=>r.json())
 .then(d=>{
@@ -834,6 +905,26 @@ function updateTerrainOpacityBox(){
   } else {
     box.style.display = "none";
   }
+// ===== AHMED EDIT 47-C: Show terrain legend only with DEM/Hillshade =====
+const terrainLegend = document.getElementById('terrainLegendBox');
+if(terrainLegend){
+  terrainLegend.style.display =
+    (map.hasLayer(demLayer) || map.hasLayer(hillshadeLayer)) ? "block" : "none";
+}
+}
+// ===== AHMED EDIT 44-SAFE: Safe Land Use Legend Visibility =====
+function updateLandUseLegendSafe(){
+  const legend = document.getElementById('legendBox');
+
+  if(!legend || typeof landLayer === "undefined"){
+    return;
+  }
+
+  if(map.hasLayer(landLayer)){
+    legend.style.display = "block";
+  } else {
+    legend.style.display = "none";
+  }
 }
 function initLayers(){
 setTimeout(()=>{
@@ -848,12 +939,17 @@ document.getElementById('hillshadeOpacity').addEventListener('input', function (
 });
 // ===== AHMED EDIT 43-C: Watch terrain layer changes =====
 map.on('overlayadd overlayremove', updateTerrainOpacityBox);
+// ===== AHMED EDIT 44-SAFE-B: Watch Land Use legend safely =====
+map.on('overlayadd overlayremove', updateLandUseLegendSafe);
 updateTerrainOpacityBox();
+// ===== AHMED EDIT 44-SAFE-C: Initial Land Use legend state =====
+updateLandUseLegendSafe();
 L.control.layers(
 null,
 {
 "Imagery":imagery,
 "Land Use":landLayer,
+"Districts":districtLayer,
 "Networks":networkLayer,
 "Pressure":pressureLayer,
 "Electric":electricLayer,
