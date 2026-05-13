@@ -594,7 +594,25 @@ boundaryLayer.addTo(map);
 // ===== AHMED EDIT 51-A: Roads Layer =====
 // ===== AHMED EDIT 53-A: Engineering Solutions layers =====
 const solutionLayers = L.layerGroup().addTo(map);
+// ===== AHMED EDIT 57-A: Open Channel layer =====
+const openChannelLayer = L.geoJSON(null,{
+  style:{
+  color:"#3b82f6",
+  weight:4,
+  opacity:1
+},
 
+  onEachFeature:function(f,l){
+
+    l.bindPopup(`
+<div style="direction:rtl;text-align:right;min-width:180px">
+  <h3 style="margin:0 0 8px;color:#0f172a">القناة المفتوحة</h3>
+  <div><b>الوصف:</b> قناة مفتوحة قائمة</div>
+</div>
+`);
+
+  }
+});
 function solutionStyle(id){
   const styles = {
     1: "#2563eb",
@@ -1046,6 +1064,15 @@ l.bindPopup(`
 keepSolutionsOnTop();
   });
 });
+// ===== AHMED EDIT 57-B: Load Open Channel =====
+fetch('data/openchanel.geojson')
+.then(r=>r.json())
+.then(d=>{
+  openChannelLayer.addData(d);
+if(map.hasLayer(solutionLayers)){
+  openChannelLayer.addTo(map);
+}
+});
 fetch('data/roads.geojson?v=20260513')
 .then(r=>r.json())
 .then(d=>{
@@ -1213,6 +1240,18 @@ function keepSolutionsOnTop(){
 
 map.on('overlayadd overlayremove zoomend', keepSolutionsOnTop);
 keepSolutionsOnTop();
+// ===== AHMED EDIT 57-C: Sync Open Channel with Engineering Solutions =====
+map.on('overlayadd', function(e){
+  if(e.layer === solutionLayers){
+    map.addLayer(openChannelLayer);
+  }
+});
+
+map.on('overlayremove', function(e){
+  if(e.layer === solutionLayers){
+    map.removeLayer(openChannelLayer);
+  }
+});
 // ===== AHMED EDIT 54-A: Hide all layers button inside layer control area =====
 const hideAllControl = L.control({ position: 'topright' });
 
