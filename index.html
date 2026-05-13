@@ -246,7 +246,7 @@ color:#ffffff;
 }
 
 .leaflet-control-layers{
-width:210px !important;
+width:250px !important;
 box-sizing:border-box !important;
 }
 
@@ -280,6 +280,29 @@ margin-left:4px !important;
 background:#0f172a !important;
 color:#ffffff !important;
 }
+/* ===== AHMED EDIT 71-A: Zoom to layer button inside LAYERS ===== */
+.layer-zoom-btn{
+width:24px !important;
+height:24px !important;
+min-width:24px !important;
+border-radius:7px !important;
+border:1px solid rgba(56,189,248,0.55) !important;
+background:#020617 !important;
+color:#38bdf8 !important;
+font-size:12px !important;
+font-weight:950 !important;
+cursor:pointer !important;
+padding:0 !important;
+margin-left:auto !important;
+flex-shrink:0 !important;
+box-shadow:0 0 10px rgba(56,189,248,0.18) !important;
+}
+
+.layer-zoom-btn:hover{
+background:#0f172a !important;
+color:#ffffff !important;
+transform:scale(1.08);
+}
 .leaflet-control-layers input{
 width:auto !important;
 margin-right:8px !important;
@@ -291,7 +314,10 @@ vertical-align:middle;
 .leaflet-control-layers label{
 display:flex !important;
 align-items:center !important;
-gap:8px !important;
+gap:7px !important;
+font-size:13px !important;
+width:100% !important;
+box-sizing:border-box !important;
 }
 /* ===== AHMED EDIT 46-C: District Arabic labels ===== */
 /* ===== AHMED EDIT 53-C: Engineering Solutions labels ===== */
@@ -856,6 +882,22 @@ let basinLayer = L.geoJSON(null,{
     });
   }
 }).addTo(map);
+// ===== AHMED EDIT 70-A: Streams Layer =====
+let streamsLayer = L.geoJSON(null,{
+  style:{
+    color:"#1e88ff",
+    weight:1.8,
+    opacity:1
+  },
+  onEachFeature:function(f,l){
+    l.bindPopup(`
+      <div style="direction:rtl;text-align:right;min-width:180px">
+        <h3 style="margin:0 0 8px;color:#0f172a">Streams</h3>
+        <div><b>النوع:</b> مجاري سيول</div>
+      </div>
+    `);
+  }
+}).addTo(map);
 let roadsLayer = L.geoJSON(null,{
   style:function(){
     return{
@@ -1307,6 +1349,12 @@ if(map.hasLayer(solutionLayers)){
 }
 });
 // ===== AHMED EDIT 65-C: Load BASIN GeoJSON =====
+// ===== AHMED EDIT 70-B: Load Streams GeoJSON =====
+fetch('data/Streams.geojson?v=20260513')
+.then(r=>r.json())
+.then(d=>{
+  streamsLayer.addData(d);
+});
 fetch('data/BASIN.geojson?v=20260513')
 .then(r=>r.json())
 .then(d=>{
@@ -1442,7 +1490,8 @@ function setupLayerOrderList(){
   layerOrderList = [
     { name:"Land Use", layer:landLayer },
     { name:"Basin", layer:basinLayer },
-    { name:"Districts", layer:districtLayer },
+      { name:"Streams", layer:streamsLayer },
+      { name:"Districts", layer:districtLayer },
     { name:"Al Khafji Boundary", layer:boundaryLayer },
     { name:"Roads", layer:roadsLayer },
     { name:"Engineering Solutions", layer:solutionLayers },
@@ -1457,7 +1506,26 @@ function setupLayerOrderList(){
 // ===== AHMED EDIT 67-C: Add order arrows inside Leaflet Layers control =====
 // ===== AHMED EDIT 68-A: Drag layers inside Leaflet Layers control =====
 let draggedLayerLabel = null;
+// ===== AHMED EDIT 71-B: Zoom to layer from LAYERS control =====
+function zoomToLayerFromControl(layerName){
+  const item = layerOrderList.find(function(x){
+    return x.name === layerName;
+  });
 
+  if(!item || !item.layer || !item.layer.getBounds){
+    return;
+  }
+
+  const bounds = item.layer.getBounds();
+
+  if(bounds && bounds.isValid()){
+    map.fitBounds(bounds, {
+      padding:[40,40],
+      maxZoom:16,
+      animate:true
+    });
+  }
+}
 function enableDragOrderInsideLayersControl(){
   document.querySelectorAll('.layer-control-order-btn').forEach(function(btn){
     btn.remove();
@@ -1471,6 +1539,29 @@ function enableDragOrderInsideLayersControl(){
     label.setAttribute('draggable', 'true');
 label.style.cursor = "move";
 
+    // ===== AHMED EDIT 71-C: Add zoom button to GeoJSON layers only =====
+    const layerName = label.innerText.trim();
+
+    if(
+      !label.querySelector('.layer-zoom-btn') &&
+      layerName !== "Imagery" &&
+      layerName !== "DEM" &&
+      layerName !== "Hillshade"
+    ){
+      const zoomBtn = document.createElement('button');
+      zoomBtn.className = 'layer-zoom-btn';
+      zoomBtn.type = 'button';
+      zoomBtn.innerHTML = '🔎+';
+      zoomBtn.title = 'Zoom to layer';
+
+      zoomBtn.onclick = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        zoomToLayerFromControl(layerName);
+      };
+
+      label.appendChild(zoomBtn);
+    }
     label.ondragstart = function(e){
       draggedLayerLabel = label;
       label.style.opacity = "0.45";
@@ -1630,6 +1721,12 @@ document.getElementById('hillshadeOpacity').addEventListener('input', function (
 });
 // ===== AHMED EDIT 43-C: Watch terrain layer changes =====
 map.on('overlayadd overlayremove', updateTerrainOpacityBox);
+// ===== AHMED FIX 71-E: Keep zoom buttons fixed inside LAYERS =====
+map.on('overlayadd overlayremove', function(){
+  setTimeout(function(){
+    enableDragOrderInsideLayersControl();
+  },100);
+});
 // ===== AHMED EDIT 44-SAFE-B: Watch Land Use legend safely =====
 map.on('overlayadd overlayremove', updateLandUseLegendSafe);
 updateTerrainOpacityBox();
@@ -1685,6 +1782,7 @@ null,
 "Districts":districtLayer,
 "Al Khafji Boundary":boundaryLayer,
 "Basin":basinLayer,
+"Streams":streamsLayer,
 "Roads":roadsLayer,
 "Engineering Solutions":solutionLayers,
 "Networks":networkLayer,
@@ -1702,7 +1800,7 @@ hideAllControl.addTo(map);
 // ===== AHMED FIX 68-I: Enable drag order after Layers control is ready =====
 setTimeout(function(){
   enableDragOrderInsideLayersControl();
-},500);
+},700);
 // ===== AHMED EDIT 64-B: Full extent button inside zoom control position =====
 const fullExtentControl = L.control({ position: 'topleft' });
 
@@ -1738,6 +1836,10 @@ function toggleLayersPanel(){
   if(titleBox){
     titleBox.innerHTML = isCollapsed ? "LAYERS ▸" : "LAYERS ▾";
   }
+
+  setTimeout(function(){
+    enableDragOrderInsideLayersControl();
+  },150);
 }
 
 function toggleAllOverlays(){
@@ -1749,6 +1851,7 @@ if(typeof allLayersHidden === "undefined"){
     districtLayer,
     boundaryLayer,
       basinLayer,
+      streamsLayer,
       roadsLayer,
     solutionLayers,
     networkLayer,
