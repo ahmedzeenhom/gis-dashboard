@@ -5,7 +5,8 @@
 <title>Unbreakable GIS UI v1</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js">
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.js"></script>
 /* ===== AHMED MARK 28: نهاية JavaScript ===== */
 </script>
 
@@ -489,13 +490,12 @@ const demLayer = L.tileLayer(
   {
     attribution: 'DEM',
     opacity: 0.65,
-    maxZoom: 16,
+    maxZoom: 20,
     maxNativeZoom: 16
   }
 );
-// ===== AHMED EDIT 39-A: Show DEM Layer On Map =====
-demLayer.addTo(map);
-// ===== AHMED EDIT 40: Keep DEM above Hillshade =====
+// ===== AHMED EDIT 56-A: DEM disabled on startup =====
+// demLayer.addTo(map);// ===== AHMED EDIT 40: Keep DEM above Hillshade =====
 demLayer.bringToFront();
 ;/* ===== AHMED MARK 16: أماكن تخزين بيانات الطبقات بعد التحميل ===== */
 /* ================= DATA ================= */
@@ -665,7 +665,7 @@ l.bindPopup(`
 
 
 let pressureLayer=L.geoJSON(null,{
-style:{color:"#000",weight:2},
+style:{color:"#000",weight:3,opacity:1,dashArray:"10 8"},
 onEachFeature:function(f,l){
 
 let p=f.properties || {};
@@ -1056,17 +1056,64 @@ fetch('data/alkhafje-network.json')
 .then(d=>{
 N=d.features;
 networkLayer.addData(d);
-buildDropdowns();
+// ===== AHMED EDIT 45-H: Sync Force Mains arrows with layer =====
+if (map.hasLayer(pressureLayer)) {
+  pressureArrowsLayer.addTo(map);
+}
+
+map.on('overlayadd', function(e) {
+  if (e.layer === pressureLayer && pressureArrowsLayer) {
+    map.addLayer(pressureArrowsLayer);
+  }
 });
 
+map.on('overlayremove', function(e) {
+  if (e.layer === pressureLayer && pressureArrowsLayer) {
+    map.removeLayer(pressureArrowsLayer);
+  }
+});
+
+buildDropdowns();
+});
 fetch('data/pressure_line.geojson')
 .then(r=>r.json())
 .then(d=>{
 P=d.features;
 pressureLayer.addData(d);
-buildDropdowns();
+pressureArrowsLayer = L.layerGroup();
+d.features.forEach(function(feature){
+  if (!feature.geometry) return;
+
+  var lines = feature.geometry.type === "MultiLineString"
+    ? feature.geometry.coordinates
+    : [feature.geometry.coordinates];
+
+  lines.forEach(function(line){
+    var latlngs = line.map(function(c){
+      return [c[1], c[0]];
+    });
+
+    L.polylineDecorator(latlngs, {
+  patterns: [{
+    offset: 12,
+    repeat: 45,
+    symbol: L.Symbol.arrowHead({
+      pixelSize: 8,
+      polygon: true,
+      pathOptions: {
+        color: '#ff00ff',
+        fillColor: '#ff00ff',
+        fillOpacity: 1,
+        weight: 1
+      }
+    })
+  }]
+}).addTo(pressureArrowsLayer);
+  });
 });
-// ===== AHMED EDIT 46-D: Load Districts GeoJSON =====
+
+buildDropdowns();
+});// ===== AHMED EDIT 46-D: Load Districts GeoJSON =====
 // ===== AHMED EDIT 48-C: Load Al Khafji Boundary GeoJSON =====
 fetch('data/AL-khafje.geojson')
 .then(r=>r.json())
@@ -1186,8 +1233,8 @@ null,
 "Roads":roadsLayer,
 "Engineering Solutions":solutionLayers,
 "Networks":networkLayer,
-"Pressure":pressureLayer,
-"Electric":electricLayer,
+"Force Mains":pressureLayer,
+"Pump Station":electricLayer,
 "DEM":demLayer,
 "Hillshade":hillshadeLayer
 },{
