@@ -97,7 +97,53 @@ padding:10px;
 border-radius:10px;
 font-size:12px;
 }
+/* ===== AHMED EDIT 74-B: Contact Box under brand ===== */
+#contactBox{
+margin-top:10px;
+padding-top:10px;
+border-top:1px solid rgba(56,189,248,0.25);
+}
 
+#contactToggleBtn{
+width:100%;
+background:rgba(2,6,23,0.95);
+color:#38bdf8;
+border:1px solid rgba(56,189,248,0.55);
+border-radius:8px;
+padding:7px 8px;
+font-size:11px;
+font-weight:900;
+cursor:pointer;
+text-shadow:0 0 8px rgba(56,189,248,0.45);
+}
+
+#contactToggleBtn:hover{
+background:#0f172a;
+color:#ffffff;
+}
+
+#contactContent{
+display:none;
+margin-top:8px;
+}
+
+#contactBox.contact-open #contactContent{
+display:block;
+}
+
+.contact-item{
+font-size:11px;
+line-height:1.7;
+color:#e5e7eb;
+word-break:break-word;
+}
+
+.contact-item{
+font-size:11px;
+line-height:1.7;
+color:#e5e7eb;
+word-break:break-word;
+}
 /* ===== AHMED MARK 06: شكل كروت الفلاتر في الشمال ===== */
 /* UI BLOCKS */
 .section-header{
@@ -602,7 +648,19 @@ color:#ffffff !important;
 <!-- ===== AHMED EDIT 08: زر الرجوع للمشروع في مكان مستقل ===== -->
 <!-- ===== AHMED MARK 11: صندوق اسم أحمد أسفل يمين ===== -->
 <!-- BRAND (UNBREAKABLE) -->
-<div id="brandBox">AHMED ZEEN<br>GIS SPECIALIST</div>
+<div id="brandBox">
+  AHMED ZEEN<br>
+  GIS SPECIALIST
+
+    <div id="contactBox">
+    <button id="contactToggleBtn" onclick="toggleContactBox()">للتواصل ▸</button>
+
+    <div id="contactContent">
+      <div class="contact-item">ahmedzeenhom@gmail.com</div>
+      <div class="contact-item">+966561337578</div>
+    </div>
+  </div>
+</div>
 <!-- ===== AHMED EDIT 47-A: Terrain legend floating on map ===== -->
 <!-- ===== AHMED EDIT 05: زر الرجوع لحدود المشروع ===== -->
 <!-- ===== AHMED EDIT 02: مفتاح ألوان استخدامات الأراضي ===== -->
@@ -1910,6 +1968,19 @@ if(window.allLayersHidden){
 }
   updateTerrainOpacityBox();
   updateLandUseLegendSafe();
+}
+// ===== AHMED FIX 74-E: Toggle contact box =====
+function toggleContactBox(){
+  const box = document.getElementById("contactBox");
+  const btn = document.getElementById("contactToggleBtn");
+
+  if(!box || !btn) return;
+
+  box.classList.toggle("contact-open");
+
+  btn.innerHTML = box.classList.contains("contact-open")
+    ? "للتواصل ▾"
+    : "للتواصل ▸";
 }
 function toggleSidebar(){
 document.body.classList.toggle("sidebar-hidden");
