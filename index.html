@@ -550,12 +550,12 @@ const districtsMinVisibleZoom = 13;
 function updateDistrictsVisibilityByZoom(){
   if(map.getZoom() >= districtsMinVisibleZoom){
     districtLayer.setStyle({
-  color: "#9ca3af",
-  weight: 1,
-  fillColor: "#000000",
-  fillOpacity: 0,
-  opacity: 0.45
-});
+      color: "#f97316",
+      weight: 2,
+      fillColor: "#000000",
+      fillOpacity: 0.02,
+      opacity: 1
+    });
     districtLayer.eachLayer(function(layer){
       if(layer.getTooltip()){
         layer.openTooltip();
@@ -1046,7 +1046,7 @@ l.bindPopup(`
 keepSolutionsOnTop();
   });
 });
-fetch('data/roads.geojson')
+fetch('data/roads.geojson?v=20260513')
 .then(r=>r.json())
 .then(d=>{
     roadsLayer.addData(d);
@@ -1081,7 +1081,7 @@ setTimeout(function(){
   map.setView([28.42, 48.49], 12.25);
 }, 300);
 });
-fetch('data/districts.geojson')
+fetch('data/districts.geojson?v=20260513')
 .then(r=>r.json())
 .then(d=>{
   D=d.features;
