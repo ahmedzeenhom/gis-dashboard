@@ -29,7 +29,9 @@ left:0;
 top:0;
 width:380px;
 height:100%;
-background:linear-gradient(180deg,#070b18,#0b1220);
+background:rgba(2,6,23,0.35);
+backdrop-filter:blur(8px) brightness(1.25);
+-webkit-backdrop-filter:blur(8px) brightness(1.25);
 color:#e5e7eb;
 padding:14px;
 overflow:auto;
@@ -40,11 +42,13 @@ z-index:1000;
 /* ===== AHMED MARK 03: مكان الخريطة MAP ===== */
 /* MAP */
 #map{
-position:absolute;
-left:380px;
+position:fixed;
+left:0;
 top:0;
 right:0;
 bottom:0;
+width:100vw;
+height:100vh;
 }
 
 /* ===== AHMED MARK 04: عنوان المشروع أعلى الخريطة ===== */
@@ -99,9 +103,11 @@ font-size:12px;
 .section-header{
 margin-top:12px;
 padding:10px;
-background:rgba(255,255,255,0.04);
+background:rgba(2,6,23,0.15);
+backdrop-filter:blur(8px) brightness(1.25);
+-webkit-backdrop-filter:blur(8px) brightness(1.25);
 border-radius:10px;
-border:1px solid rgba(255,255,255,0.06);
+border:1px solid rgba(56,189,248,0.22);
 }
 
 .section-header h3{
@@ -124,10 +130,10 @@ select,input{
 width:100%;
 padding:10px;
 margin-top:6px;
-background:#0b1220;
+background:rgba(2,6,23,0.35);
 color:#fff;
 border-radius:10px;
-border:1px solid rgba(255,255,255,0.08);
+border:1px solid rgba(56,189,248,0.18);
 }
 
 /* ===== AHMED MARK 08: مكان ظهور زرار الطبقات ===== */
@@ -141,7 +147,9 @@ z-index:99999 !important;
 }
 /* ===== AHMED EDIT 01: تحسين شكل صندوق الطبقات يمين فوق ===== */
 .leaflet-control-layers{
-background:rgba(2,6,23,0.95) !important;
+background:rgba(2,6,23,0.20) !important;
+backdrop-filter:blur(8px) brightness(1.35);
+-webkit-backdrop-filter:blur(8px) brightness(1.50);
 color:#ffffff !important;
 border-radius:14px !important;
 padding:12px !important;
@@ -149,36 +157,83 @@ border:1px solid rgba(56,189,248,0.45) !important;
 box-shadow:0 10px 25px rgba(0,0,0,0.45) !important;
 font-size:14px !important;
 line-height:1.8 !important;
+backdrop-filter:blur(6px);
 }
-/* ===== AHMED EDIT 54-B: Hide all layers button style ===== */
+/* ===== AHMED EDIT 58-A: Professional layers title and hide button ===== */
+.layers-title-box,
 .hide-all-layers-box{
+width:210px !important;
+box-sizing:border-box !important;
+background:linear-gradient(135deg,rgba(2,6,23,0.98),rgba(15,23,42,0.95)) !important;
+color:#ffffff !important;
+border:1px solid rgba(56,189,248,0.65) !important;
+border-radius:14px !important;
+padding:10px 12px !important;
+box-shadow:0 10px 25px rgba(0,0,0,0.45) !important;
+text-align:center !important;
+}
+
+.layers-title-box{
+font-size:15px !important;
+font-weight:950 !important;
+letter-spacing:2px !important;
+color:#38bdf8 !important;
+text-shadow:0 0 10px rgba(56,189,248,0.65);
 margin-bottom:8px !important;
+cursor:pointer !important;
+user-select:none !important;
+}
+
+.hide-all-layers-box{
+margin-top:8px !important;
 }
 
 .hide-all-layers-box button{
 width:100%;
-background:#7f1d1d;
-color:#ffffff;
-border:1px solid rgba(248,113,113,0.7);
+background:linear-gradient(135deg,rgba(2,6,23,0.98),rgba(15,23,42,0.95));
+color:#38bdf8;
+border:1px solid rgba(56,189,248,0.65);
 border-radius:10px;
-padding:8px 10px;
-font-weight:900;
+padding:10px 12px;
+font-weight:950;
+letter-spacing:1px;
 cursor:pointer;
+text-shadow:0 0 10px rgba(56,189,248,0.65);
+box-shadow:0 0 14px rgba(56,189,248,0.18);
 }
 
 .hide-all-layers-box button:hover{
-background:#991b1b;
+background:#0f172a;
+color:#ffffff;
 }
+
+.leaflet-control-layers{
+width:210px !important;
+box-sizing:border-box !important;
+}
+
 .leaflet-control-layers label{
 color:#ffffff !important;
 margin-bottom:6px !important;
 cursor:pointer;
+display:flex !important;
+align-items:center !important;
+flex-direction:row !important;
+gap:8px !important;
+white-space:nowrap !important;
 }
-
 .leaflet-control-layers input{
 width:auto !important;
-margin-left:6px !important;
+margin-right:8px !important;
+margin-left:0 !important;
 accent-color:#38bdf8;
+vertical-align:middle;
+}
+
+.leaflet-control-layers label{
+display:flex !important;
+align-items:center !important;
+gap:8px !important;
 }
 /* ===== AHMED EDIT 46-C: District Arabic labels ===== */
 /* ===== AHMED EDIT 53-C: Engineering Solutions labels ===== */
@@ -191,6 +246,29 @@ accent-color:#38bdf8;
   font-size:12px;
   font-weight:900;
   box-shadow:0 4px 12px rgba(0,0,0,0.35);
+}
+/* ===== AHMED EDIT 65-A: Basin click label ===== */
+.basin-label{
+  background:rgba(2,6,23,0.82);
+  color:#ffffff;
+  border:1px solid rgba(255,255,255,0.45);
+  border-radius:8px;
+  padding:4px 9px;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:0 4px 12px rgba(0,0,0,0.35);
+outline:none !important;
+box-shadow:0 4px 12px rgba(0,0,0,0.35) !important;
+}
+/* ===== AHMED FIX 65-G: Remove Leaflet tooltip focus rectangle ===== */
+.leaflet-tooltip.basin-label,
+.leaflet-tooltip.basin-label:focus,
+.leaflet-tooltip.basin-label:active{
+outline:none !important;
+}
+
+.leaflet-interactive:focus{
+outline:none !important;
 }
 .district-label{
   background:rgba(2,6,23,0.75);
@@ -268,11 +346,13 @@ transform:scale(1.06);
 }
 
 body.sidebar-hidden #sidebar{
-left:-380px;
+left:-420px;
 }
 
 body.sidebar-hidden #map{
 left:0;
+width:100vw;
+height:100vh;
 }
 
 body.sidebar-hidden #projectTitle{
@@ -386,11 +466,42 @@ letter-spacing:2px;
 margin-top:2px;
 text-shadow:0 0 10px rgba(56,189,248,0.7);
 }
-</style>
+/* ===== AHMED EDIT 60-H: Start layers panel collapsed without flash ===== */
+body.layers-collapsed .leaflet-control-layers,
+body.layers-collapsed .hide-all-layers-box{
+display:none !important;
+/* ===== AHMED EDIT 64-C: Full extent button above zoom buttons ===== */
+.full-extent-control{
+margin-bottom:0 !important;
+box-shadow:0 8px 22px rgba(0,0,0,0.45) !important;
+border:none !important;
+}
+.full-extent-control a,
+.leaflet-bar.full-extent-control a,
+.leaflet-bar.full-extent-control a:visited{
+width:30px !important;
+height:30px !important;
+line-height:30px !important;
+font-size:18px !important;
+text-align:center !important;
+background-color:#020617 !important;
+background:#020617 !important;
+color:#38bdf8 !important;
+border:1px solid rgba(56,189,248,0.45) !important;
+display:block !important;
+text-decoration:none !important;
+font-weight:900 !important;
+}
+.full-extent-control a:hover,
+.leaflet-bar.full-extent-control a:hover{
+background:#0f172a !important;
+color:#ffffff !important;
+}
+}}</style>
 </head>
 
 <!-- ===== AHMED EDIT 23: فتح الموقع والقائمة الجانبية مخفية تلقائيًا ===== -->
-<body class="sidebar-hidden">
+<body class="sidebar-hidden layers-collapsed">
 
 <!-- ===== AHMED MARK 10: عنوان المشروع في أعلى الخريطة ===== -->
 <!-- TITLE -->
@@ -461,7 +572,7 @@ const map = L.map('map', {
     [30.8, 51.5]
   ],
   maxBoundsViscosity: 1.0
-}).setView([28.4,48.5],13);
+}).setView([28.42, 48.49], 12.25);
 const imagery = L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
 {
@@ -628,6 +739,63 @@ function solutionStyle(id){
     dashArray: "8,8"
   };
 }
+// ===== AHMED EDIT 65-B: BASIN Layer with click label =====
+const basinColors = [
+  "#6ee7b7",
+  "#a78bfa",
+  "#f87171",
+  "#fde68a",
+  "#86efac",
+  "#93c5fd",
+  "#c4b5fd",
+  "#f9a8d4",
+  "#bef264",
+  "#67e8f9"
+];
+
+let activeBasinLabel = null;
+let basinColorIndex = 0;
+
+let basinLayer = L.geoJSON(null,{
+  style:function(f){
+    if(!f.properties){
+      f.properties = {};
+    }
+
+    if(typeof f.properties._basinColorIndex === "undefined"){
+      f.properties._basinColorIndex = basinColorIndex++;
+    }
+
+    return{
+      color:"#4b5563",
+      weight:1.2,
+      fillColor:basinColors[f.properties._basinColorIndex % basinColors.length],
+      fillOpacity:0.45,
+      opacity:0.75
+    };
+  },
+
+  onEachFeature:function(f,l){
+    const p = f.properties || {};
+    const name = p.EnglishName || "Unknown";
+
+    l.bindTooltip(name,{
+      permanent:false,
+      direction:"center",
+      className:"basin-label",
+      opacity:1
+    });
+
+    l.on("click", function(){
+      if(activeBasinLabel && activeBasinLabel !== l){
+        activeBasinLabel.closeTooltip();
+      }
+
+      l.openTooltip();
+      activeBasinLabel = l;
+    });
+  }
+}).addTo(map);
 let roadsLayer = L.geoJSON(null,{
   style:function(){
     return{
@@ -681,7 +849,8 @@ l.bindPopup(`
 }
 }).addTo(map);
 
-
+// ===== AHMED EDIT 62-A: Force Mains arrows layer group =====
+let pressureArrowsLayer = L.layerGroup();
 let pressureLayer=L.geoJSON(null,{
 style:{color:"#000",weight:3,opacity:1,dashArray:"10 8"},
 onEachFeature:function(f,l){
@@ -1073,6 +1242,13 @@ if(map.hasLayer(solutionLayers)){
   openChannelLayer.addTo(map);
 }
 });
+// ===== AHMED EDIT 65-C: Load BASIN GeoJSON =====
+fetch('data/BASIN.geojson?v=20260513')
+.then(r=>r.json())
+.then(d=>{
+  B = d.features;
+  basinLayer.addData(d);
+});
 fetch('data/roads.geojson?v=20260513')
 .then(r=>r.json())
 .then(d=>{
@@ -1107,7 +1283,6 @@ fetch('data/pressure_line.geojson')
 .then(d=>{
 P=d.features;
 pressureLayer.addData(d);
-pressureArrowsLayer = L.layerGroup();
 d.features.forEach(function(feature){
   if (!feature.geometry) return;
 
@@ -1151,9 +1326,8 @@ fetch('data/AL-khafje.geojson')
     // ===== AHMED EDIT 49-B: Initial zoom to Al Khafji Boundary =====
     // ===== AHMED EDIT 49-E: Delayed zoom to boundary after layer draw =====
 // ===== AHMED EDIT 49-G: Initial fixed zoom to Al Khafji =====
-setTimeout(function(){
-  map.setView([28.42, 48.49], 12.25);
-}, 300);
+// ===== AHMED EDIT 63-B: Initial zoom already set in map startup =====
+// map.setView([28.42, 48.49], 12.25);
 });
 fetch('data/districts.geojson?v=20260513')
 .then(r=>r.json())
@@ -1253,6 +1427,17 @@ map.on('overlayremove', function(e){
   }
 });
 // ===== AHMED EDIT 54-A: Hide all layers button inside layer control area =====
+// ===== AHMED EDIT 58-B: Layers title above layer control =====
+const layersTitleControl = L.control({ position: 'topright' });
+
+layersTitleControl.onAdd = function(){
+  const div = L.DomUtil.create('div', 'layers-title-box');
+  div.innerHTML = `LAYERS ▸`;
+div.title = "إظهار / إخفاء الطبقات";
+div.onclick = toggleLayersPanel;
+  L.DomEvent.disableClickPropagation(div);
+  return div;
+};
 const hideAllControl = L.control({ position: 'topright' });
 
 hideAllControl.onAdd = function(){
@@ -1261,7 +1446,7 @@ hideAllControl.onAdd = function(){
   L.DomEvent.disableClickPropagation(div);
   return div;
 };
-
+layersTitleControl.addTo(map);
 L.control.layers(
 null,
 {
@@ -1269,6 +1454,7 @@ null,
 "Land Use":landLayer,
 "Districts":districtLayer,
 "Al Khafji Boundary":boundaryLayer,
+"Basin":basinLayer,
 "Roads":roadsLayer,
 "Engineering Solutions":solutionLayers,
 "Networks":networkLayer,
@@ -1282,13 +1468,43 @@ position:"topright"
 }
 ).addTo(map);
 hideAllControl.addTo(map);
+// ===== AHMED EDIT 64-B: Full extent button inside zoom control position =====
+const fullExtentControl = L.control({ position: 'topleft' });
 
+fullExtentControl.onAdd = function(){
+  const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control full-extent-control');
+  div.innerHTML = `<a href="#" title="الخريطة كاملة">🌐</a>`;
+
+  div.onclick = function(e){
+    L.DomEvent.preventDefault(e);
+    map.setView([28.42, 48.49], 12.25);
+  };
+
+  L.DomEvent.disableClickPropagation(div);
+  return div;
+};
+
+fullExtentControl.addTo(map);
 },800);
 }
 /* ===== AHMED MARK 27: تشغيل النظام ===== */
 /* ================= BOOT SYSTEM ================= */
 /* ===== AHMED EDIT 22: وظيفة إظهار وإخفاء القائمة الجانبية ===== */
 // ===== AHMED EDIT 54-B: Hide all overlay layers except imagery =====
+// ===== AHMED EDIT 60-B: Toggle layers panel from LAYERS title =====
+// ===== AHMED EDIT 60-K: Toggle layers panel using body class =====
+function toggleLayersPanel(){
+  const titleBox = document.querySelector('.layers-title-box');
+
+  document.body.classList.toggle("layers-collapsed");
+
+  const isCollapsed = document.body.classList.contains("layers-collapsed");
+
+  if(titleBox){
+    titleBox.innerHTML = isCollapsed ? "LAYERS ▸" : "LAYERS ▾";
+  }
+}
+
 function toggleAllOverlays(){
 if(typeof allLayersHidden === "undefined"){
   window.allLayersHidden = false;
@@ -1297,7 +1513,8 @@ if(typeof allLayersHidden === "undefined"){
     landLayer,
     districtLayer,
     boundaryLayer,
-    roadsLayer,
+      basinLayer,
+      roadsLayer,
     solutionLayers,
     networkLayer,
     pressureLayer,
