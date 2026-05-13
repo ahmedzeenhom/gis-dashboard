@@ -550,12 +550,12 @@ const districtsMinVisibleZoom = 13;
 function updateDistrictsVisibilityByZoom(){
   if(map.getZoom() >= districtsMinVisibleZoom){
     districtLayer.setStyle({
-      color: "#f97316",
-      weight: 2,
-      fillColor: "#000000",
-      fillOpacity: 0.02,
-      opacity: 1
-    });
+  color: "#9ca3af",
+  weight: 1,
+  fillColor: "#000000",
+  fillOpacity: 0,
+  opacity: 0.45
+});
     districtLayer.eachLayer(function(layer){
       if(layer.getTooltip()){
         layer.openTooltip();
