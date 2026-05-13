@@ -123,6 +123,44 @@ background:rgba(255,255,255,0.02);
 border-radius:10px;
 border:1px solid rgba(255,255,255,0.05);
 }
+/* ===== AHMED EDIT 66-A: Layer Order Panel Style ===== */
+.layer-order-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:8px;
+padding:8px;
+margin-top:6px;
+background:rgba(2,6,23,0.35);
+border:1px solid rgba(56,189,248,0.18);
+border-radius:10px;
+color:#ffffff;
+font-size:12px;
+font-weight:800;
+}
+
+.layer-order-name{
+flex:1;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.layer-order-btn{
+width:28px;
+height:28px;
+border-radius:8px;
+border:1px solid rgba(56,189,248,0.45);
+background:#020617;
+color:#38bdf8;
+font-weight:900;
+cursor:pointer;
+}
+
+.layer-order-btn:hover{
+background:#0f172a;
+color:#ffffff;
+}
 
 /* ===== AHMED MARK 07: شكل القوائم والاختيارات ===== */
 /* INPUTS */
@@ -221,6 +259,26 @@ align-items:center !important;
 flex-direction:row !important;
 gap:8px !important;
 white-space:nowrap !important;
+}
+/* ===== AHMED EDIT 67-B: Layer order arrows inside Leaflet Layers ===== */
+.layer-control-order-btn{
+width:22px !important;
+height:22px !important;
+line-height:18px !important;
+border-radius:6px !important;
+border:1px solid rgba(56,189,248,0.45) !important;
+background:#020617 !important;
+color:#38bdf8 !important;
+font-size:13px !important;
+font-weight:900 !important;
+cursor:pointer !important;
+padding:0 !important;
+margin-left:4px !important;
+}
+
+.layer-control-order-btn:hover{
+background:#0f172a !important;
+color:#ffffff !important;
 }
 .leaflet-control-layers input{
 width:auto !important;
@@ -470,6 +528,8 @@ text-shadow:0 0 10px rgba(56,189,248,0.7);
 body.layers-collapsed .leaflet-control-layers,
 body.layers-collapsed .hide-all-layers-box{
 display:none !important;
+}
+
 /* ===== AHMED EDIT 64-C: Full extent button above zoom buttons ===== */
 .full-extent-control{
 margin-bottom:0 !important;
@@ -572,7 +632,7 @@ const map = L.map('map', {
     [30.8, 51.5]
   ],
   maxBoundsViscosity: 1.0
-}).setView([28.42, 48.49], 12.25);
+}).setView([28.42, 48.49], 11.5);
 const imagery = L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
 {
@@ -1100,7 +1160,11 @@ document.getElementById("sidebar").innerHTML = `
 <input type="range" id="b" min="50" max="150" value="100">
 <input type="range" id="c" min="50" max="150" value="100">
 </div>
-
+<!-- ===== AHMED EDIT 66-B: Layer Order Panel disabled ===== -->
+<div class="section-header" style="display:none;">
+<h3>ترتيب الطبقات</h3>
+<div id="layerOrderPanel"></div>
+</div>
 <!-- ===== AHMED EDIT 42-F: DEM and Hillshade opacity sliders in sidebar ===== -->
 <div class="section-header" id="terrainOpacityBox" style="display:none;">
 <h3>شفافية التضاريس</h3>
@@ -1248,6 +1312,20 @@ fetch('data/BASIN.geojson?v=20260513')
 .then(d=>{
   B = d.features;
   basinLayer.addData(d);
+
+  // ===== AHMED EDIT 69-A: Initial zoom extent to BASIN =====
+    if(basinLayer.getBounds && basinLayer.getBounds().isValid()){
+    map.fitBounds(basinLayer.getBounds(), {
+  padding:[35,35],
+  maxZoom:15,
+  animate:false
+});
+
+// ===== AHMED FIX 69-E: Pan map slightly left after BASIN zoom =====
+map.panBy([100, 0], {
+  animate:false
+});
+  }
 });
 fetch('data/roads.geojson?v=20260513')
 .then(r=>r.json())
@@ -1357,6 +1435,158 @@ features:E
 /* ===== AHMED EDIT 36-B: إضافة Hillshade لقائمة الطبقات بشكل آمن ===== */
 /* ===== AHMED EDIT 39: جعل Imagery طبقة اختيار عادية Checkbox ===== */
 // ===== AHMED EDIT 43-B: Show terrain opacity controls only when needed =====
+// ===== AHMED EDIT 66-C: Layer order data =====
+let layerOrderList = [];
+
+function setupLayerOrderList(){
+  layerOrderList = [
+    { name:"Land Use", layer:landLayer },
+    { name:"Basin", layer:basinLayer },
+    { name:"Districts", layer:districtLayer },
+    { name:"Al Khafji Boundary", layer:boundaryLayer },
+    { name:"Roads", layer:roadsLayer },
+    { name:"Engineering Solutions", layer:solutionLayers },
+    { name:"Networks", layer:networkLayer },
+    { name:"Force Mains", layer:pressureLayer },
+    { name:"Pump Station", layer:electricLayer },
+    { name:"DEM", layer:demLayer },
+    { name:"Hillshade", layer:hillshadeLayer }
+  ];
+}
+// ===== AHMED EDIT 66-D: Render and move layer order =====
+// ===== AHMED EDIT 67-C: Add order arrows inside Leaflet Layers control =====
+// ===== AHMED EDIT 68-A: Drag layers inside Leaflet Layers control =====
+let draggedLayerLabel = null;
+
+function enableDragOrderInsideLayersControl(){
+  document.querySelectorAll('.layer-control-order-btn').forEach(function(btn){
+    btn.remove();
+  });
+  const container = document.querySelector('.leaflet-control-layers-overlays');
+  if(!container) return;
+
+  const labels = container.querySelectorAll('label');
+
+  labels.forEach(function(label){
+    label.setAttribute('draggable', 'true');
+label.style.cursor = "move";
+
+    label.ondragstart = function(e){
+      draggedLayerLabel = label;
+      label.style.opacity = "0.45";
+      e.dataTransfer.effectAllowed = "move";
+    };
+
+    label.ondragend = function(){
+      label.style.opacity = "1";
+      draggedLayerLabel = null;
+      applyLayerOrderFromLayersControl();
+    };
+
+    label.ondragover = function(e){
+      e.preventDefault();
+    };
+
+    label.ondrop = function(e){
+      e.preventDefault();
+
+      if(!draggedLayerLabel || draggedLayerLabel === label){
+        return;
+      }
+
+      container.insertBefore(draggedLayerLabel, label);
+    };
+  });
+}
+
+function applyLayerOrderFromLayersControl(){
+  const labels = Array.from(document.querySelectorAll('.leaflet-control-layers-overlays label'));
+
+  labels.reverse().forEach(function(label){
+    const layerName = label.innerText.trim();
+
+    const item = layerOrderList.find(function(x){
+      return x.name === layerName;
+    });
+
+    if(item && map.hasLayer(item.layer) && item.layer.bringToFront){
+      item.layer.bringToFront();
+    }
+  });
+}function addOrderButtonsInsideLayersControl(){
+  return;
+  const labels = document.querySelectorAll('.leaflet-control-layers-overlays label');
+
+  labels.forEach(function(label){
+    if(label.querySelector('.layer-control-order-btn')){
+      return;
+    }
+
+    const upBtn = document.createElement('button');
+    upBtn.className = 'layer-control-order-btn';
+    upBtn.innerHTML = '↑';
+    upBtn.type = 'button';
+
+    const downBtn = document.createElement('button');
+    downBtn.className = 'layer-control-order-btn';
+    downBtn.innerHTML = '↓';
+    downBtn.type = 'button';
+
+    upBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    downBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    label.appendChild(upBtn);
+    label.appendChild(downBtn);
+  });
+}
+function renderLayerOrderPanel(){
+  const panel = document.getElementById("layerOrderPanel");
+  if(!panel) return;
+
+  panel.innerHTML = "";
+
+  layerOrderList.forEach(function(item, index){
+    const row = document.createElement("div");
+    row.className = "layer-order-row";
+
+    row.innerHTML = `
+      <button class="layer-order-btn" onclick="moveLayerOrder(${index}, -1)">↑</button>
+      <span class="layer-order-name">${item.name}</span>
+      <button class="layer-order-btn" onclick="moveLayerOrder(${index}, 1)">↓</button>
+    `;
+
+    panel.appendChild(row);
+  });
+}
+
+function applyLayerOrder(){
+  layerOrderList.forEach(function(item){
+    if(map.hasLayer(item.layer) && item.layer.bringToFront){
+      item.layer.bringToFront();
+    }
+  });
+}
+
+function moveLayerOrder(index, direction){
+  const newIndex = index + direction;
+
+  if(newIndex < 0 || newIndex >= layerOrderList.length){
+    return;
+  }
+
+  const item = layerOrderList.splice(index, 1)[0];
+  layerOrderList.splice(newIndex, 0, item);
+
+  renderLayerOrderPanel();
+  applyLayerOrder();
+}
 function updateTerrainOpacityBox(){
   const box = document.getElementById('terrainOpacityBox');
   if(!box) return;
@@ -1468,6 +1698,11 @@ position:"topright"
 }
 ).addTo(map);
 hideAllControl.addTo(map);
+
+// ===== AHMED FIX 68-I: Enable drag order after Layers control is ready =====
+setTimeout(function(){
+  enableDragOrderInsideLayersControl();
+},500);
 // ===== AHMED EDIT 64-B: Full extent button inside zoom control position =====
 const fullExtentControl = L.control({ position: 'topleft' });
 
@@ -1552,6 +1787,10 @@ if(window.allLayersHidden){
 function toggleSidebar(){
 document.body.classList.toggle("sidebar-hidden");
 
+// ===== AHMED FIX 67-E: Disable old arrow buttons =====
+// setTimeout(function(){
+//   addOrderButtonsInsideLayersControl();
+// },300);
 setTimeout(function(){
 map.invalidateSize();
 },300);
@@ -1567,6 +1806,8 @@ document.getElementById('demOpacity').addEventListener('input', function () {
 document.getElementById('hillshadeOpacity').addEventListener('input', function () {
   hillshadeLayer.setOpacity(Number(this.value));
 });
+setupLayerOrderList();
+renderLayerOrderPanel();
 initLayers();
 }
 
