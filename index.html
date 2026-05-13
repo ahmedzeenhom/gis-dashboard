@@ -583,7 +583,7 @@ font-weight:900 !important;
 background:#0f172a !important;
 color:#ffffff !important;
 }
-}}</style>
+</style>
 </head>
 
 <!-- ===== AHMED EDIT 23: فتح الموقع والقائمة الجانبية مخفية تلقائيًا ===== -->
@@ -1508,6 +1508,17 @@ function setupLayerOrderList(){
 let draggedLayerLabel = null;
 // ===== AHMED EDIT 71-B: Zoom to layer from LAYERS control =====
 function zoomToLayerFromControl(layerName){
+  if(layerName === "DEM" || layerName === "Hillshade"){
+    if(boundaryLayer.getBounds && boundaryLayer.getBounds().isValid()){
+      map.fitBounds(boundaryLayer.getBounds(), {
+        padding:[40,40],
+        maxZoom:16,
+        animate:true
+      });
+    }
+    return;
+  }
+
   const item = layerOrderList.find(function(x){
     return x.name === layerName;
   });
@@ -1542,11 +1553,9 @@ label.style.cursor = "move";
     // ===== AHMED EDIT 71-C: Add zoom button to GeoJSON layers only =====
     const layerName = label.innerText.trim();
 
-    if(
+        if(
       !label.querySelector('.layer-zoom-btn') &&
-      layerName !== "Imagery" &&
-      layerName !== "DEM" &&
-      layerName !== "Hillshade"
+      layerName !== "Imagery"
     ){
       const zoomBtn = document.createElement('button');
       zoomBtn.className = 'layer-zoom-btn';
