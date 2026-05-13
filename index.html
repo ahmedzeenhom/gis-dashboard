@@ -63,6 +63,23 @@ font-weight:800;
 
 /* ===== AHMED MARK 05: اسمك أسفل يمين الشاشة ===== */
 /* BRAND (LOCKED) */
+/* ===== AHMED EDIT 47-B: Terrain legend floating position ===== */
+#terrainLegendBox{
+position:relative;
+left:auto;
+bottom:auto;
+z-index:99999;
+background:rgba(2,6,23,0.88);
+border:1px solid rgba(56,189,248,0.45);
+padding:6px;
+box-shadow:0 8px 20px rgba(0,0,0,0.35);}
+
+#terrainLegendBox img{
+width:105px;
+display:block;
+opacity:0.95;
+border-radius:8px;
+}
 #brandBox{
 position:fixed;
 right:12px;
@@ -132,7 +149,25 @@ box-shadow:0 10px 25px rgba(0,0,0,0.45) !important;
 font-size:14px !important;
 line-height:1.8 !important;
 }
+/* ===== AHMED EDIT 54-B: Hide all layers button style ===== */
+.hide-all-layers-box{
+margin-bottom:8px !important;
+}
 
+.hide-all-layers-box button{
+width:100%;
+background:#7f1d1d;
+color:#ffffff;
+border:1px solid rgba(248,113,113,0.7);
+border-radius:10px;
+padding:8px 10px;
+font-weight:900;
+cursor:pointer;
+}
+
+.hide-all-layers-box button:hover{
+background:#991b1b;
+}
 .leaflet-control-layers label{
 color:#ffffff !important;
 margin-bottom:6px !important;
@@ -144,7 +179,28 @@ width:auto !important;
 margin-left:6px !important;
 accent-color:#38bdf8;
 }
-
+/* ===== AHMED EDIT 46-C: District Arabic labels ===== */
+/* ===== AHMED EDIT 53-C: Engineering Solutions labels ===== */
+.solution-label{
+  background:rgba(2,6,23,0.82);
+  color:#ffffff;
+  border:1px solid rgba(255,255,255,0.45);
+  border-radius:8px;
+  padding:3px 8px;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:0 4px 12px rgba(0,0,0,0.35);
+}
+.district-label{
+  background:rgba(2,6,23,0.75);
+  color:#ffffff;
+  border:1px solid rgba(255,255,255,0.35);
+  border-radius:8px;
+  padding:3px 7px;
+  font-size:12px;
+  font-weight:800;
+  box-shadow:0 4px 12px rgba(0,0,0,0.35);
+}
 .leaflet-control-layers-separator{
 border-top:1px solid rgba(56,189,248,0.35) !important;
 }
@@ -349,6 +405,7 @@ text-shadow:0 0 10px rgba(56,189,248,0.7);
 <!-- ===== AHMED MARK 11: صندوق اسم أحمد أسفل يمين ===== -->
 <!-- BRAND (UNBREAKABLE) -->
 <div id="brandBox">AHMED ZEEN<br>GIS SPECIALIST</div>
+<!-- ===== AHMED EDIT 47-A: Terrain legend floating on map ===== -->
 <!-- ===== AHMED EDIT 05: زر الرجوع لحدود المشروع ===== -->
 <!-- ===== AHMED EDIT 02: مفتاح ألوان استخدامات الأراضي ===== -->
 <div id="legendBox">
@@ -394,12 +451,23 @@ text-shadow:0 0 10px rgba(56,189,248,0.7);
 
 /* ===== AHMED MARK 15: إعداد الخريطة ومكان البداية ===== */
 /* ================= MAP ================= */
-const map = L.map('map').setView([28.4,48.5],13);
-
+const map = L.map('map', {
+  zoomSnap: 0.25,
+  zoomDelta: 0.25,
+  minZoom: 7,
+  maxBounds: [
+    [23.0, 46.0],
+    [30.8, 51.5]
+  ],
+  maxBoundsViscosity: 1.0
+}).setView([28.4,48.5],13);
 const imagery = L.tileLayer(
-'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-).addTo(map);
-/* ===== AHMED EDIT 38-A: خلفية فاضية لإخفاء الصورة الجوية ===== */
+'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+{
+  noWrap:true,
+  bounds:[[-85,-180],[85,180]]
+}
+).addTo(map);/* ===== AHMED EDIT 38-A: خلفية فاضية لإخفاء الصورة الجوية ===== */
 /* ===== AHMED EDIT 36-A: إضافة طبقة Hillshade من XYZ Tiles ===== */
 /* ===== AHMED EDIT 37: منع اختفاء Hillshade بعد مستوى الزووم المتاح ===== */
 /* ===== AHMED EDIT 37: Hillshade Tiles بجودة أعلى حتى زووم 17 ===== */
@@ -431,15 +499,155 @@ demLayer.addTo(map);
 demLayer.bringToFront();
 ;/* ===== AHMED MARK 16: أماكن تخزين بيانات الطبقات بعد التحميل ===== */
 /* ================= DATA ================= */
-let K=[],N=[],P=[],E=[];
+let K=[],N=[],P=[],E=[],D=[],B=[];
 
 /* ===== AHMED MARK 17: تعريف طبقات الخريطة ===== */
 /* ================= LAYERS ================= */
 let landLayer=L.geoJSON(null).addTo(map);
-/* ===== AHMED EDIT 04: Popups للشبكات وخطوط الطرد ومحطات الرفع ===== */
+// ===== AHMED EDIT 46-B: Districts Layer with Arabic Labels =====
+let districtLayer = L.geoJSON(null, {
+ style: {
+  color: "#9ca3af",
+  weight: 1,
+  fillColor: "#000000",
+  fillOpacity: 0,
+  opacity: 0
+},
+  onEachFeature: function (f, l) {
+    const p = f.properties || {};
+  // ===== AHMED EDIT 46-H: Hide district label if ArabicName is empty =====
+// ===== AHMED EDIT 46-J: Treat empty / بدون اسم as no label =====
+const rawDistrictName = (p.ArabicName || "").trim();
+// ===== AHMED EDIT 46-L: Hide الحرس الوطني district =====
+if(rawDistrictName === "الحرس الوطني"){
+    return;
+}
 
+const nameAr = rawDistrictName === "بدون اسم" ? "" : rawDistrictName;
+
+if(nameAr){
+  l.bindTooltip(nameAr, {
+    permanent: false,
+    direction: "center",
+    className: "district-label"
+  });
+
+}
+
+    l.bindPopup(`
+      <div style="direction:rtl;text-align:right;min-width:180px">
+        <h3 style="margin:0 0 8px;color:#0f172a">بيانات الحي</h3>
+        <div><b>اسم الحي:</b> ${nameAr || "غير معروف"}</div>
+      </div>
+    `);
+  }
+});
+// ===== AHMED EDIT 46-I: Show Districts by default =====
+districtLayer.addTo(map);
+// ===== AHMED EDIT 50-A: Districts visible only after zoom in =====
+const districtsMinVisibleZoom = 13;
+
+function updateDistrictsVisibilityByZoom(){
+  if(map.getZoom() >= districtsMinVisibleZoom){
+    districtLayer.setStyle({
+  color: "#9ca3af",
+  weight: 1,
+  fillColor: "#000000",
+  fillOpacity: 0,
+  opacity: 0.45
+});
+    districtLayer.eachLayer(function(layer){
+      if(layer.getTooltip()){
+        layer.openTooltip();
+      }
+    });
+  } else {
+    districtLayer.setStyle({
+      opacity: 0,
+      fillOpacity: 0
+    });
+    districtLayer.eachLayer(function(layer){
+      if(layer.getTooltip()){
+        layer.closeTooltip();
+      }
+    });
+  }
+}
+
+map.on("zoomend", updateDistrictsVisibilityByZoom);
+// ===== AHMED EDIT 48-G: Clean Boundary Layer =====
+let boundaryLayer = L.geoJSON(null,{
+  interactive:false,
+  style:function(){
+    return{
+      color:"#ffffff",
+      weight:2,
+      fillOpacity:0,
+      opacity:1
+    };
+  }
+});
+
+boundaryLayer.addTo(map);
+// ===== AHMED EDIT 48-B: Al Khafji boundary layer =====
+/* ===== AHMED EDIT 04: Popups للشبكات وخطوط الطرد ومحطات الرفع ===== */
+// ===== AHMED EDIT 51-A: Roads Layer =====
+// ===== AHMED EDIT 53-A: Engineering Solutions layers =====
+const solutionLayers = L.layerGroup().addTo(map);
+
+function solutionStyle(id){
+  const styles = {
+    1: "#2563eb",
+    2: "#ef4444",
+    3: "#f59e0b",
+    4: "#22c55e"
+  };
+
+  return {
+    color: styles[id] || "#ffffff",
+    weight: 6,
+    opacity: 1,
+    dashArray: "8,8"
+  };
+}
+let roadsLayer = L.geoJSON(null,{
+  style:function(){
+    return{
+      color:"#1a1a1a",
+           weight:1.4,
+           fillColor:"#6b7280",
+           fillOpacity:0.88,
+           opacity:1
+    };
+  }
+});
+// ===== AHMED EDIT 51-D: Show Roads by default =====
+roadsLayer.addTo(map);
+// ===== AHMED EDIT 55-A: Network colors by NO =====
+function networkColor(no){
+  no = String(no || "").trim();
+
+  const colors = {
+  "1": "#2563eb", // أزرق
+  "2": "#ef4444", // أحمر
+  "3": "#ffffff", // أبيض
+  "4": "#22c55e", // أخضر
+  "5": "#facc15", // أصفر
+  "6": "#a855f7", // بنفسجي
+  "7": "#fb923c"  // برتقالي
+};
+
+  return colors[no] || "#38bdf8";
+}
 let networkLayer=L.geoJSON(null,{
-style:{color:"#ff0000",weight:2},
+style:function(f){
+  const no = f.properties ? f.properties.NO : "";
+  return {
+    color: networkColor(no),
+    weight: 2.5,
+    opacity: 1
+  };
+},
 onEachFeature:function(f,l){
 
 let p=f.properties || {};
@@ -629,10 +837,7 @@ layer.bindPopup(`
 <div style="direction:rtl;text-align:right;min-width:220px">
     <h3 style="margin:0 0 8px;color:#0f172a">بيانات قطعة الأرض</h3>
     <div><b>الاستخدام:</b> ${useValue}</div>
-    <hr>
-    <div style="font-size:12px;color:#334155">
-        لو القطعة المفروض سكني لكن مش صفراء، ابعتلي قيمة الاستخدام الظاهرة هنا.
-    </div>
+    
 </div>
 `);
 layer.on("mouseover", function(){
@@ -668,7 +873,6 @@ fillOpacity:0.6
 function buildUI(){
 
 document.getElementById("sidebar").innerHTML = `
-
 <div class="section-header">
 <h3>استخدامات الاراضي</h3>
 <select id="useFilter" onchange="filterUSE()">
@@ -719,6 +923,8 @@ document.getElementById("sidebar").innerHTML = `
 
 <label>Hillshade opacity</label>
 <input type="range" id="hillshadeOpacity" min="0" max="1" step="0.05" value="0.45">
+<div id="terrainLegendBox">
+  <img src="data/terrain-legend.png" alt="DEM and Hillshade Legend">
 </div>
 
 `;
@@ -761,7 +967,9 @@ features: v==="all"?E:E.filter(x=>String(x.properties.StructureStatus)==v)
 function buildDropdowns(){
 
 networkFilter.innerHTML=`<option value="all">All</option>`;
-[...new Set(N.map(x=>x.properties.NO))].forEach(v=>{
+[...new Set(N.map(x=>x.properties.NO))]
+.sort((a,b)=>Number(a)-Number(b))
+.forEach(v=>{
 networkFilter.innerHTML+=`<option value="${v}">${v}</option>`;
 });
 
@@ -791,9 +999,58 @@ fetch('data/alkhafje.geojson')
 .then(d=>{
 K=d.features;
 renderLand(K);
-map.fitBounds(landLayer.getBounds());
+// ===== AHMED EDIT 49-A: Disabled old zoom to Land Use =====
+// map.fitBounds(landLayer.getBounds());
 });
+// ===== AHMED EDIT 51-B: Load Roads GeoJSON =====
+// ===== AHMED EDIT 53-B: Load Engineering Solutions =====
+[
+  'data/Solution 1.json',
+  'data/Solution 2.json',
+  'data/Solution 3.json',
+  'data/Solution 4.json'
+].forEach(function(url){
+  fetch(url)
+  .then(r=>r.json())
+  .then(d=>{
+    L.geoJSON(d,{
+      style:function(f){
+        const id = f.properties.SolutionID;
+        return solutionStyle(id);
+      },
+      onEachFeature:function(f,l){
+        const id = f.properties.SolutionID || "";
 
+const solutionDescriptions = {
+  1: "انشاء عبارة صندوقية لدرء أخطار السيول - من أسكان الخفجي (القناة المفتوحة القائمة)حتي خور الخفجي",
+  2: "قناة مفتوحة  شرق الطريق الدولي لحماية منطقة الكليات",
+  3: "انشاء قناة مفتوحة لدرء أخطار السيول - غرب حي السلام",
+  4: "إنشاء قناة مفتوحة لتوجيه مسار المياه إلى الناحية الشرقية أراضي فضاء بطول 1 كلم"
+};
+
+
+l.bindPopup(`
+  <div style="
+    direction:rtl;
+    text-align:right;
+    font-family:Arial;
+    min-width:220px;
+  ">
+    <b>Solution ${id}</b>
+    <hr style="margin:6px 0;">
+    ${solutionDescriptions[id] || "لا يوجد وصف"}
+  </div>
+`);
+      }
+    }).addTo(solutionLayers);
+keepSolutionsOnTop();
+  });
+});
+fetch('data/roads.geojson')
+.then(r=>r.json())
+.then(d=>{
+    roadsLayer.addData(d);
+});
 fetch('data/alkhafje-network.json')
 .then(r=>r.json())
 .then(d=>{
@@ -809,7 +1066,34 @@ P=d.features;
 pressureLayer.addData(d);
 buildDropdowns();
 });
+// ===== AHMED EDIT 46-D: Load Districts GeoJSON =====
+// ===== AHMED EDIT 48-C: Load Al Khafji Boundary GeoJSON =====
+fetch('data/AL-khafje.geojson')
+.then(r=>r.json())
+.then(d=>{
+    boundaryLayer.clearLayers();
+    boundaryLayer.addData(d);
 
+    // ===== AHMED EDIT 49-B: Initial zoom to Al Khafji Boundary =====
+    // ===== AHMED EDIT 49-E: Delayed zoom to boundary after layer draw =====
+// ===== AHMED EDIT 49-G: Initial fixed zoom to Al Khafji =====
+setTimeout(function(){
+  map.setView([28.42, 48.49], 12.25);
+}, 300);
+});
+fetch('data/districts.geojson')
+.then(r=>r.json())
+.then(d=>{
+  D=d.features;
+// ===== AHMED EDIT 46-M: Remove الحرس الوطني from districts =====
+d.features = d.features.filter(f => {
+    const n = (f.properties.ArabicName || "").trim();
+    return n !== "الحرس الوطني";
+});
+
+districtLayer.addData(d);});
+// ===== AHMED EDIT 50-B: Apply districts zoom visibility after load =====
+updateDistrictsVisibilityByZoom();
 fetch('data/electric.geojson')
 .then(r=>r.json())
 .then(d=>{
@@ -834,6 +1118,26 @@ function updateTerrainOpacityBox(){
   } else {
     box.style.display = "none";
   }
+// ===== AHMED EDIT 47-C: Show terrain legend only with DEM/Hillshade =====
+const terrainLegend = document.getElementById('terrainLegendBox');
+if(terrainLegend){
+  terrainLegend.style.display =
+    (map.hasLayer(demLayer) || map.hasLayer(hillshadeLayer)) ? "block" : "none";
+}
+}
+// ===== AHMED EDIT 44-SAFE: Safe Land Use Legend Visibility =====
+function updateLandUseLegendSafe(){
+  const legend = document.getElementById('legendBox');
+
+  if(!legend || typeof landLayer === "undefined"){
+    return;
+  }
+
+  if(map.hasLayer(landLayer)){
+    legend.style.display = "block";
+  } else {
+    legend.style.display = "none";
+  }
 }
 function initLayers(){
 setTimeout(()=>{
@@ -848,12 +1152,39 @@ document.getElementById('hillshadeOpacity').addEventListener('input', function (
 });
 // ===== AHMED EDIT 43-C: Watch terrain layer changes =====
 map.on('overlayadd overlayremove', updateTerrainOpacityBox);
+// ===== AHMED EDIT 44-SAFE-B: Watch Land Use legend safely =====
+map.on('overlayadd overlayremove', updateLandUseLegendSafe);
 updateTerrainOpacityBox();
+// ===== AHMED EDIT 44-SAFE-C: Initial Land Use legend state =====
+updateLandUseLegendSafe();
+// ===== AHMED EDIT 53-G: Keep Engineering Solutions on top =====
+function keepSolutionsOnTop(){
+  solutionLayers.eachLayer(function(layer){
+    layer.bringToFront();
+  });
+}
+
+map.on('overlayadd overlayremove zoomend', keepSolutionsOnTop);
+keepSolutionsOnTop();
+// ===== AHMED EDIT 54-A: Hide all layers button inside layer control area =====
+const hideAllControl = L.control({ position: 'topright' });
+
+hideAllControl.onAdd = function(){
+  const div = L.DomUtil.create('div', 'leaflet-control-layers hide-all-layers-box');
+  div.innerHTML = `<button id="toggleAllLayersBtn" onclick="toggleAllOverlays()">إخفاء الطبقات</button>`;
+  L.DomEvent.disableClickPropagation(div);
+  return div;
+};
+
 L.control.layers(
 null,
 {
 "Imagery":imagery,
 "Land Use":landLayer,
+"Districts":districtLayer,
+"Al Khafji Boundary":boundaryLayer,
+"Roads":roadsLayer,
+"Engineering Solutions":solutionLayers,
 "Networks":networkLayer,
 "Pressure":pressureLayer,
 "Electric":electricLayer,
@@ -864,12 +1195,57 @@ collapsed:false,
 position:"topright"
 }
 ).addTo(map);
+hideAllControl.addTo(map);
 
 },800);
 }
 /* ===== AHMED MARK 27: تشغيل النظام ===== */
 /* ================= BOOT SYSTEM ================= */
 /* ===== AHMED EDIT 22: وظيفة إظهار وإخفاء القائمة الجانبية ===== */
+// ===== AHMED EDIT 54-B: Hide all overlay layers except imagery =====
+function toggleAllOverlays(){
+if(typeof allLayersHidden === "undefined"){
+  window.allLayersHidden = false;
+}
+  const layers = [
+    landLayer,
+    districtLayer,
+    boundaryLayer,
+    roadsLayer,
+    solutionLayers,
+    networkLayer,
+    pressureLayer,
+    electricLayer,
+    demLayer,
+    hillshadeLayer
+  ];
+if(!window.allLayersHidden){
+  layers.forEach(function(layer){
+    if(map.hasLayer(layer)){
+      map.removeLayer(layer);
+    }
+  });
+window.allLayersHidden = true;
+document.getElementById("toggleAllLayersBtn").innerText = "إظهار الطبقات";
+return;
+}
+if(window.allLayersHidden){
+  layers.forEach(function(layer){
+    if(!map.hasLayer(layer)){
+      layer.addTo(map);
+    }
+  });
+
+  window.allLayersHidden = false;
+  document.getElementById("toggleAllLayersBtn").innerText = "إخفاء الطبقات";
+  keepSolutionsOnTop();
+
+  updateTerrainOpacityBox();
+  updateLandUseLegendSafe();
+}
+  updateTerrainOpacityBox();
+  updateLandUseLegendSafe();
+}
 function toggleSidebar(){
 document.body.classList.toggle("sidebar-hidden");
 

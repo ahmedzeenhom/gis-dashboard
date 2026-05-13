@@ -1,0 +1,4 @@
+{
+  "type" : "FeatureCollection",
+  "features" : [{"type":"Feature","id":1,"geometry":{"type":"LineString","coordinates":[[48.394797346491799,28.359726513112655],[48.410765657744761,28.354339006369699]]},"properties":{"OBJECTID":1,"FID_":0,"Entity":" ","Layer":" ","Color":0,"Linetype":" ","Elevation":0,"LineWt":0,"RefName":" ","no":"حائط توجيهي","des":1676.13318129,"Shape_Length":1676.1332219515011,"SolutionID":4}}]
+}
