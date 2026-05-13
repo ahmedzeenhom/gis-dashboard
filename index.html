@@ -507,12 +507,12 @@ let landLayer=L.geoJSON(null).addTo(map);
 // ===== AHMED EDIT 46-B: Districts Layer with Arabic Labels =====
 let districtLayer = L.geoJSON(null, {
  style: {
-    color: "#f97316",
-    weight: 2,
-    fillColor: "#000000",
-    fillOpacity: 0,
-    opacity: 0
-  },
+  color: "#9ca3af",
+  weight: 1,
+  fillColor: "#000000",
+  fillOpacity: 0,
+  opacity: 0
+},
   onEachFeature: function (f, l) {
     const p = f.properties || {};
   // ===== AHMED EDIT 46-H: Hide district label if ArabicName is empty =====
@@ -550,12 +550,12 @@ const districtsMinVisibleZoom = 13;
 function updateDistrictsVisibilityByZoom(){
   if(map.getZoom() >= districtsMinVisibleZoom){
     districtLayer.setStyle({
-      color: "#f97316",
-      weight: 2,
-      fillColor: "#000000",
-      fillOpacity: 0.02,
-      opacity: 1
-    });
+  color: "#9ca3af",
+  weight: 1,
+  fillColor: "#000000",
+  fillOpacity: 0,
+  opacity: 0.45
+});
     districtLayer.eachLayer(function(layer){
       if(layer.getTooltip()){
         layer.openTooltip();
@@ -1022,10 +1022,10 @@ renderLand(K);
         const id = f.properties.SolutionID || "";
 
 const solutionDescriptions = {
-  1: "انشاء عبارة طولية لتمديد القناة المفتوحة القائمة",
-  2: "انشاء حاجز توجيهي (تدبيش حجري) شرق الطريق الدولي بطول 3 كلم لتوجيه المياه باتجاه الجنوب",
-  3: "إنشاء حاجز توجيهي لتوجيه مسار المياه لامتداد العبارة الصندوقية المقترحة داخل النطاق العمراني",
-  4: "إنشاء حاجز توجيهي لتوجيه مسار المياه إلى الناحية الشرقية أراضي فضاء بطول 1 كلم"
+  1: "انشاء عبارة صندوقية لدرء أخطار السيول - من أسكان الخفجي (القناة المفتوحة القائمة)حتي خور الخفجي",
+  2: "قناة مفتوحة  شرق الطريق الدولي لحماية منطقة الكليات",
+  3: "انشاء قناة مفتوحة لدرء أخطار السيول - غرب حي السلام",
+  4: "إنشاء قناة مفتوحة لتوجيه مسار المياه إلى الناحية الشرقية أراضي فضاء بطول 1 كلم"
 };
 
 
