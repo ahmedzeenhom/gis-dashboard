@@ -214,10 +214,15 @@ select,input{
 width:100%;
 padding:10px;
 margin-top:6px;
-background:rgba(2,6,23,0.35);
+background:rgba(2,6,23,0.75);
 color:#fff;
 border-radius:10px;
-border:1px solid rgba(56,189,248,0.18);
+border:1px solid rgba(56,189,248,0.35);
+font-weight:700;
+}
+select option{
+background:#0f172a;
+color:#ffffff;
 }
 
 /* ===== AHMED MARK 08: مكان ظهور زرار الطبقات ===== */
@@ -1352,7 +1357,9 @@ networkFilter.innerHTML+=`<option value="${v}">${v}</option>`;
 });
 
 pressureFilter.innerHTML=`<option value="all">All</option>`;
-[...new Set(P.map(x=>x.properties.des))].forEach(v=>{
+[...new Set(P.map(x=>x.properties.des))]
+.sort((a,b)=>Number(a)-Number(b))
+.forEach(v=>{
 pressureFilter.innerHTML+=`<option value="${v}">${v}</option>`;
 });
 }
