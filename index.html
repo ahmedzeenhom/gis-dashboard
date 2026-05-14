@@ -26,9 +26,11 @@ background:#050814;
 #sidebar{
 position:absolute;
 left:14px;
-top:14px;
-width:380px;
-height:calc(100% - 28px);
+top:42px;
+width:360px;
+height:auto;
+max-height:calc(100% - 56px);
+border-radius:14px;
 border-radius:18px;
 overflow-y:auto;
 transition:left 0.45s ease;
@@ -102,7 +104,7 @@ line-height:1.6;
 width:18px;
 height:42px;
 border-radius:3px;
-background:linear-gradient(to bottom,#7e22ce,#ef4444,#facc15,#22c55e,#38bdf8);
+background:linear-gradient(to bottom,#ec4899,#f97316,#facc15,#22c55e,#38bdf8);
 border:1px solid rgba(255,255,255,0.35);
 }
 
@@ -239,6 +241,7 @@ color:#ffffff;
 /* INPUTS */
 select,input{
 width:100%;
+box-sizing:border-box;
 padding:10px;
 margin-top:6px;
 background:rgba(2,6,23,0.75);
@@ -246,8 +249,7 @@ color:#fff;
 border-radius:10px;
 border:1px solid rgba(56,189,248,0.35);
 font-weight:700;
-}
-select option{
+}select option{
 background:#0f172a;
 color:#ffffff;
 }
