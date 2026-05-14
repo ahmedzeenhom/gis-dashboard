@@ -829,12 +829,26 @@ const districtsMinVisibleZoom = 13;
 
 function updateDistrictsVisibilityByZoom(){
   if(map.getZoom() >= districtsMinVisibleZoom){
-    districtLayer.setStyle({
-  color: "#9ca3af",
-  weight: 1,
-  fillColor: "#000000",
-  fillOpacity: 0,
-  opacity: 0.45
+    districtLayer.setStyle(function(f){
+  const name = ((f.properties && f.properties.ArabicName) || "").trim();
+
+  if(name === "الخور"){
+    return {
+      color: "#111827",
+      weight: 0,
+      fillColor: "#000000",
+      fillOpacity: 0,
+      opacity: 0
+    };
+  }
+
+  return {
+    color: "#374151",
+    weight: 2,
+    fillColor: "#000000",
+    fillOpacity: 0,
+    opacity: 0.85
+  };
 });
     districtLayer.eachLayer(function(layer){
       if(layer.getTooltip()){
@@ -1205,6 +1219,7 @@ if(bounds && bounds.isValid()){
 let useValue = layer.feature.properties.USE || "غير معروف";
 
 /* ===== AHMED EDIT 07: Popup أوضح لمعرفة سبب القطع غير الملونة ===== */
+
 layer.bindPopup(`
 <div style="direction:rtl;text-align:right;min-width:220px">
     <h3 style="margin:0 0 8px;color:#0f172a">بيانات قطعة الأرض</h3>
@@ -1505,8 +1520,12 @@ d.features.forEach(function(feature){
     ? feature.geometry.coordinates
     : [feature.geometry.coordinates];
 
-  lines.forEach(function(line){
-    var latlngs = line.map(function(c){
+    lines.forEach(function(line){
+    // ===== AHMED FIX 81-A: Reverse arrows direction for Force Main No. 2 only =====
+    const pressureDes = String((feature.properties && feature.properties.des) || "").trim();
+    const arrowLine = pressureDes === "2" ? line.slice().reverse() : line;
+
+    var latlngs = arrowLine.map(function(c){
       return [c[1], c[0]];
     });
 
