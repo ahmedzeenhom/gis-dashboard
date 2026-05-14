@@ -530,9 +530,8 @@ left:22px !important;
 top:auto !important;
 left:auto !important;
 right:18px !important;
-bottom:100px !important;
+bottom:155px !important;
 }
-
 /* تحسين شكل أزرار الزووم */
 .leaflet-control-zoom{
 border:none !important;
@@ -652,15 +651,7 @@ color:#ffffff !important;
   AHMED ZEEN<br>
   GIS SPECIALIST
 
-    <div id="contactBox">
-    <button id="contactToggleBtn" onclick="toggleContactBox()">للتواصل ▸</button>
-
-    <div id="contactContent">
-      <div class="contact-item">ahmedzeenhom@gmail.com</div>
-      <div class="contact-item">+966561337578</div>
     </div>
-  </div>
-</div>
 <!-- ===== AHMED EDIT 47-A: Terrain legend floating on map ===== -->
 <!-- ===== AHMED EDIT 05: زر الرجوع لحدود المشروع ===== -->
 <!-- ===== AHMED EDIT 02: مفتاح ألوان استخدامات الأراضي ===== -->
@@ -1550,18 +1541,18 @@ let layerOrderList = [];
 
 function setupLayerOrderList(){
   layerOrderList = [
-    { name:"Land Use", layer:landLayer },
-    { name:"Basin", layer:basinLayer },
-      { name:"Streams", layer:streamsLayer },
-      { name:"Districts", layer:districtLayer },
-    { name:"Al Khafji Boundary", layer:boundaryLayer },
-    { name:"Roads", layer:roadsLayer },
-    { name:"Engineering Solutions", layer:solutionLayers },
-    { name:"Networks", layer:networkLayer },
-    { name:"Force Mains", layer:pressureLayer },
-    { name:"Pump Station", layer:electricLayer },
-    { name:"DEM", layer:demLayer },
-    { name:"Hillshade", layer:hillshadeLayer }
+    { name:"استخدامات الأراضي", layer:landLayer },
+{ name:"أحواض التصريف", layer:basinLayer },
+{ name:"مسارات مجاري الأودية", layer:streamsLayer },
+{ name:"الأحياء", layer:districtLayer },
+{ name:"حدود النطاق العمراني", layer:boundaryLayer },
+{ name:"شبكة الطرق", layer:roadsLayer },
+{ name:"الحلول الهندسية", layer:solutionLayers },
+{ name:"الشبكات تصريف الأمطار", layer:networkLayer },
+{ name:"خطوط الطرد", layer:pressureLayer },
+{ name:"محطات الرفع", layer:electricLayer },
+{ name:"نموذج الارتفاعات", layer:demLayer },
+{ name:"الظلال التضاريسية", layer:hillshadeLayer }
   ];
 }
 // ===== AHMED EDIT 66-D: Render and move layer order =====
@@ -1570,7 +1561,7 @@ function setupLayerOrderList(){
 let draggedLayerLabel = null;
 // ===== AHMED EDIT 71-B: Zoom to layer from LAYERS control =====
 function zoomToLayerFromControl(layerName){
-  if(layerName === "DEM" || layerName === "Hillshade"){
+  if(layerName === "نموذج الارتفاعات" || layerName === "الظلال التضاريسية"){
     if(boundaryLayer.getBounds && boundaryLayer.getBounds().isValid()){
       map.fitBounds(boundaryLayer.getBounds(), {
         padding:[40,40],
@@ -1617,7 +1608,7 @@ label.style.cursor = "move";
 
         if(
       !label.querySelector('.layer-zoom-btn') &&
-      layerName !== "Imagery"
+      layerName !== "الصور الجوية"
     ){
       const zoomBtn = document.createElement('button');
       zoomBtn.className = 'layer-zoom-btn';
@@ -1649,14 +1640,21 @@ label.style.cursor = "move";
       e.preventDefault();
     };
 
-    label.ondrop = function(e){
+      label.ondrop = function(e){
       e.preventDefault();
 
       if(!draggedLayerLabel || draggedLayerLabel === label){
         return;
       }
 
-      container.insertBefore(draggedLayerLabel, label);
+      const rect = label.getBoundingClientRect();
+      const dropAfter = e.clientY > rect.top + rect.height / 2;
+
+      if(dropAfter){
+        container.insertBefore(draggedLayerLabel, label.nextSibling);
+      } else {
+        container.insertBefore(draggedLayerLabel, label);
+      }
     };
   });
 }
@@ -1848,19 +1846,19 @@ layersTitleControl.addTo(map);
 L.control.layers(
 null,
 {
-"Imagery":imagery,
-"Land Use":landLayer,
-"Districts":districtLayer,
-"Al Khafji Boundary":boundaryLayer,
-"Basin":basinLayer,
-"Streams":streamsLayer,
-"Roads":roadsLayer,
-"Engineering Solutions":solutionLayers,
-"Networks":networkLayer,
-"Force Mains":pressureLayer,
-"Pump Station":electricLayer,
-"DEM":demLayer,
-"Hillshade":hillshadeLayer
+"الصور الجوية":imagery,
+"استخدامات الأراضي":landLayer,
+"الأحياء":districtLayer,
+"حدود النطاق العمراني":boundaryLayer,
+"أحواض التصريف":basinLayer,
+"مسارات مجاري الأودية":streamsLayer,
+"شبكة الطرق":roadsLayer,
+"الحلول الهندسية":solutionLayers,
+"الشبكات تصريف الأمطار":networkLayer,
+"خطوط الطرد":pressureLayer,
+"محطات الرفع":electricLayer,
+"نموذج الارتفاعات":demLayer,
+"الظلال التضاريسية":hillshadeLayer
 },{
 collapsed:false,
 position:"topright"
