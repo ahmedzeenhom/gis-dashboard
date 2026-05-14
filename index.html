@@ -1045,7 +1045,7 @@ function networkColor(no){
   const colors = {
   "1": "#2563eb", // أزرق
   "2": "#ef4444", // أحمر
-  "3": "#ffffff", // أبيض
+  "3": "#ff00ff", // ماجنتا
   "4": "#22c55e", // أخضر
   "5": "#facc15", // أصفر
   "6": "#a855f7", // بنفسجي
@@ -1141,6 +1141,7 @@ onEachFeature:function(f,l){
 
 let p=f.properties || {};
 let status=p.StructureStatus || "غير معروف";
+let pumpName = p.PumpStationName || "غير معروف";
 
 let statusText="غير معروف";
 
@@ -1154,8 +1155,8 @@ statusText="🔴 مقترحة";
 
 l.bindPopup(`
 <div style="direction:rtl;text-align:right;min-width:200px">
-    <h3 style="margin:0 0 8px;color:#0f172a">بيانات محطة الرفع</h3>
-    <div><b>الحالة:</b> ${statusText}</div>
+    <h3 style="margin:0 0 8px;color:#0f172a">محطة الرفع رقم ${pumpName}</h3>
+<div><b>الحالة:</b> ${statusText}</div>
 </div>
 `);
 
@@ -1479,7 +1480,7 @@ l.bindPopup(`
     font-family:Arial;
     min-width:220px;
   ">
-    <b>Solution ${id}</b>
+    <b>حل رقم KH-F-P0${id}</b>
     <hr style="margin:6px 0;">
     ${solutionDescriptions[id] || "لا يوجد وصف"}
   </div>
@@ -1622,7 +1623,7 @@ d.features = d.features.filter(f => {
 districtLayer.addData(d);});
 // ===== AHMED EDIT 50-B: Apply districts zoom visibility after load =====
 updateDistrictsVisibilityByZoom();
-fetch('data/electric.geojson')
+fetch('data/electric.geojson?v=20260514-ps')
 .then(r=>r.json())
 .then(d=>{
 E=d.features;
