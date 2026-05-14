@@ -258,7 +258,7 @@ text-align:center !important;
 }
 
 .layers-title-box{
-font-size:15px !important;
+font-size:20px !important;
 font-weight:950 !important;
 letter-spacing:2px !important;
 color:#38bdf8 !important;
@@ -452,7 +452,33 @@ border:1px solid rgba(255,255,255,0.5);
 display:inline-block;
 }
 /* ===== AHMED EDIT 20: زر إظهار وإخفاء القائمة الجانبية ===== */
-#toggleSidebarBtn{
+/* ===== AHMED FIX 73-C: Sidebar title outside panel ===== */
+#sidebarTitleBox{
+position:fixed;
+left:400px;
+top:12px;
+width:150px;
+text-align:center;
+z-index:999999;
+background:linear-gradient(135deg,rgba(2,6,23,0.98),rgba(15,23,42,0.95));
+color:#38bdf8;
+border:1px solid rgba(56,189,248,0.65);
+border-radius:14px;
+padding:9px 18px;
+font-size:15px;
+font-weight:950;
+letter-spacing:1px;
+text-shadow:0 0 10px rgba(56,189,248,0.65);
+box-shadow:0 10px 25px rgba(0,0,0,0.45);
+}
+
+body:not(.sidebar-hidden) #sidebarTitleBox{
+display:none !important;
+}
+
+body.sidebar-hidden #sidebarTitleBox{
+display:block !important;
+}#toggleSidebarBtn{
 position:fixed;
 left:395px;
 top:70px;
@@ -496,6 +522,9 @@ left:20px;
 body.sidebar-hidden #toggleSidebarBtn{
 left:20px;
 }
+body.sidebar-hidden #sidebarTitleBox{
+left:20px;
+}
 /* ===== AHMED EDIT 25: ترتيب العنوان وزر القائمة حسب حالة الـ Sidebar ===== */
 
 /* الحالة العادية: القائمة ظاهرة */
@@ -509,7 +538,7 @@ box-shadow:0 8px 20px rgba(0,0,0,0.45);
 }
 
 #toggleSidebarBtn{
-left:400px !important;
+left:455px !important;
 top:62px !important;
 width:42px !important;
 height:42px !important;
@@ -522,6 +551,9 @@ left:22px !important;
 }
 
 body.sidebar-hidden #toggleSidebarBtn{
+left:75px !important;
+}
+body.sidebar-hidden #sidebarTitleBox{
 left:22px !important;
 }
 
@@ -638,11 +670,9 @@ color:#ffffff !important;
 <!-- TITLE -->
 <!-- ===== AHMED EDIT 26: تعديل عنوان المشروع ===== -->
 <!-- ===== AHMED EDIT 27: عنوان المشروع بشكل احترافي ===== -->
-<div id="projectTitle">
-  <div class="project-name">مشروع الخفجي</div>
-  <div class="project-gis">GIS</div>
-</div>
+
 <!-- ===== AHMED EDIT 21: زر إظهار وإخفاء القائمة ===== -->
+<div id="sidebarTitleBox">البحث العام</div>
 <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
 <!-- ===== AHMED EDIT 08: زر الرجوع للمشروع في مكان مستقل ===== -->
 <!-- ===== AHMED MARK 11: صندوق اسم أحمد أسفل يمين ===== -->
@@ -1211,6 +1241,8 @@ fillOpacity:0.6
 function buildUI(){
 
 document.getElementById("sidebar").innerHTML = `
+
+<div class="section-header">
 
 <div class="layers-title-box" style="width:100% !important;margin-bottom:14px !important;">
 البحث العام
@@ -1828,7 +1860,7 @@ const layersTitleControl = L.control({ position: 'topright' });
 
 layersTitleControl.onAdd = function(){
   const div = L.DomUtil.create('div', 'layers-title-box');
-  div.innerHTML = `LAYERS ▸`;
+  div.innerHTML = `الطبقات ▸`;
 div.title = "إظهار / إخفاء الطبقات";
 div.onclick = toggleLayersPanel;
   L.DomEvent.disableClickPropagation(div);
@@ -1914,7 +1946,7 @@ function toggleLayersPanel(){
   const isCollapsed = document.body.classList.contains("layers-collapsed");
 
   if(titleBox){
-    titleBox.innerHTML = isCollapsed ? "LAYERS ▸" : "LAYERS ▾";
+    titleBox.innerHTML = isCollapsed ? "الطبقات ▸" : "الطبقات ▾";
   }
 
   setTimeout(function(){
