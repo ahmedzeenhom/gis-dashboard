@@ -25,10 +25,15 @@ background:#050814;
 /* SIDEBAR */
 #sidebar{
 position:absolute;
-left:0;
-top:0;
-width:380px;
-height:100%;
+left:14px;
+top:42px;
+width:360px;
+height:auto;
+max-height:calc(100% - 56px);
+border-radius:14px;
+border-radius:18px;
+overflow-y:auto;
+transition:left 0.45s ease;
 background:rgba(2,6,23,0.35);
 backdrop-filter:blur(8px) brightness(1.25);
 -webkit-backdrop-filter:blur(8px) brightness(1.25);
@@ -79,11 +84,36 @@ border:1px solid rgba(56,189,248,0.45);
 padding:6px;
 box-shadow:0 8px 20px rgba(0,0,0,0.35);}
 
-#terrainLegendBox img{
-width:105px;
-display:block;
-opacity:0.95;
-border-radius:8px;
+.terrain-legend-title{
+color:#ffffff;
+font-size:12px;
+font-weight:900;
+margin:6px 0 4px;
+}
+
+.terrain-row{
+display:flex;
+align-items:center;
+gap:8px;
+color:#ffffff;
+font-size:11px;
+line-height:1.6;
+}
+
+.dem-gradient{
+width:18px;
+height:42px;
+border-radius:3px;
+background:linear-gradient(to bottom,#ec4899,#f97316,#facc15,#22c55e,#38bdf8);
+border:1px solid rgba(255,255,255,0.35);
+}
+
+.hillshade-gradient{
+width:18px;
+height:42px;
+border-radius:3px;
+background:linear-gradient(to bottom,#ffffff,#000000);
+border:1px solid rgba(255,255,255,0.35);
 }#brandBox{
 position:fixed;
 right:12px;
@@ -211,6 +241,7 @@ color:#ffffff;
 /* INPUTS */
 select,input{
 width:100%;
+box-sizing:border-box;
 padding:10px;
 margin-top:6px;
 background:rgba(2,6,23,0.75);
@@ -218,8 +249,7 @@ color:#fff;
 border-radius:10px;
 border:1px solid rgba(56,189,248,0.35);
 font-weight:700;
-}
-select option{
+}select option{
 background:#0f172a;
 color:#ffffff;
 }
@@ -829,12 +859,26 @@ const districtsMinVisibleZoom = 13;
 
 function updateDistrictsVisibilityByZoom(){
   if(map.getZoom() >= districtsMinVisibleZoom){
-    districtLayer.setStyle({
-  color: "#9ca3af",
-  weight: 1,
-  fillColor: "#000000",
-  fillOpacity: 0,
-  opacity: 0.45
+    districtLayer.setStyle(function(f){
+  const name = ((f.properties && f.properties.ArabicName) || "").trim();
+
+  if(name === "الخور"){
+    return {
+      color: "#111827",
+      weight: 0,
+      fillColor: "#000000",
+      fillOpacity: 0,
+      opacity: 0
+    };
+  }
+
+  return {
+    color: "#374151",
+    weight: 2,
+    fillColor: "#000000",
+    fillOpacity: 0,
+    opacity: 0.85
+  };
 });
     districtLayer.eachLayer(function(layer){
       if(layer.getTooltip()){
@@ -1001,7 +1045,7 @@ function networkColor(no){
   const colors = {
   "1": "#2563eb", // أزرق
   "2": "#ef4444", // أحمر
-  "3": "#ffffff", // أبيض
+  "3": "#ff00ff", // ماجنتا
   "4": "#22c55e", // أخضر
   "5": "#facc15", // أصفر
   "6": "#a855f7", // بنفسجي
@@ -1097,6 +1141,7 @@ onEachFeature:function(f,l){
 
 let p=f.properties || {};
 let status=p.StructureStatus || "غير معروف";
+let pumpName = p.PumpStationName || "غير معروف";
 
 let statusText="غير معروف";
 
@@ -1110,8 +1155,8 @@ statusText="🔴 مقترحة";
 
 l.bindPopup(`
 <div style="direction:rtl;text-align:right;min-width:200px">
-    <h3 style="margin:0 0 8px;color:#0f172a">بيانات محطة الرفع</h3>
-    <div><b>الحالة:</b> ${statusText}</div>
+    <h3 style="margin:0 0 8px;color:#0f172a">محطة الرفع رقم ${pumpName}</h3>
+<div><b>الحالة:</b> ${statusText}</div>
 </div>
 `);
 
@@ -1205,6 +1250,7 @@ if(bounds && bounds.isValid()){
 let useValue = layer.feature.properties.USE || "غير معروف";
 
 /* ===== AHMED EDIT 07: Popup أوضح لمعرفة سبب القطع غير الملونة ===== */
+
 layer.bindPopup(`
 <div style="direction:rtl;text-align:right;min-width:220px">
     <h3 style="margin:0 0 8px;color:#0f172a">بيانات قطعة الأرض</h3>
@@ -1304,7 +1350,23 @@ document.getElementById("sidebar").innerHTML = `
 
 <label>شفافية الظلال التضاريسية</label><input type="range" id="hillshadeOpacity" min="0" max="1" step="0.05" value="0.45">
 <div id="terrainLegendBox">
-  <img src="data/terrain-legend.png?v=20260514" alt="DEM and Hillshade Legend">
+  <div class="terrain-legend-title">DEM</div>
+  <div class="terrain-row">
+    <div class="dem-gradient"></div>
+    <div>
+      <div>167.58</div>
+      <div>-0.82</div>
+    </div>
+  </div>
+
+  <div class="terrain-legend-title">Hillshade</div>
+  <div class="terrain-row">
+    <div class="hillshade-gradient"></div>
+    <div>
+      <div>254</div>
+      <div>0</div>
+    </div>
+  </div>
 </div>
 
 `;
@@ -1418,7 +1480,7 @@ l.bindPopup(`
     font-family:Arial;
     min-width:220px;
   ">
-    <b>Solution ${id}</b>
+    <b>حل رقم KH-F-P0${id}</b>
     <hr style="margin:6px 0;">
     ${solutionDescriptions[id] || "لا يوجد وصف"}
   </div>
@@ -1505,8 +1567,12 @@ d.features.forEach(function(feature){
     ? feature.geometry.coordinates
     : [feature.geometry.coordinates];
 
-  lines.forEach(function(line){
-    var latlngs = line.map(function(c){
+    lines.forEach(function(line){
+    // ===== AHMED FIX 81-A: Reverse arrows direction for Force Main No. 2 only =====
+    const pressureDes = String((feature.properties && feature.properties.des) || "").trim();
+    const arrowLine = pressureDes === "2" ? line.slice().reverse() : line;
+
+    var latlngs = arrowLine.map(function(c){
       return [c[1], c[0]];
     });
 
@@ -1557,7 +1623,7 @@ d.features = d.features.filter(f => {
 districtLayer.addData(d);});
 // ===== AHMED EDIT 50-B: Apply districts zoom visibility after load =====
 updateDistrictsVisibilityByZoom();
-fetch('data/electric.geojson')
+fetch('data/electric.geojson?v=20260514-ps')
 .then(r=>r.json())
 .then(d=>{
 E=d.features;
