@@ -1464,7 +1464,12 @@ renderLand(K);
       },
       onEachFeature:function(f,l){
         const id = f.properties.SolutionID || "";
-
+const solutionImages = {
+  1: "data/KH-F-P01-S2-D001.png",
+  2: "data/KH-F-P02-S1-D001.png",
+  3: "data/KH-F-P03-S1-D001.png",
+  4: "data/KH-F-P04-S1-D001.png"
+};
 const solutionDescriptions = {
   1: "انشاء عبارة صندوقية لدرء أخطار السيول - من أسكان الخفجي (القناة المفتوحة القائمة)حتي خور الخفجي",
   2: "قناة مفتوحة  شرق الطريق الدولي لحماية منطقة الكليات",
@@ -1483,6 +1488,20 @@ l.bindPopup(`
     <b>مشروع رقم KH-F-P0${id}</b>
     <hr style="margin:6px 0;">
     ${solutionDescriptions[id] || "لا يوجد وصف"}
+
+<br><br>
+
+<a href="${solutionImages[id]}" target="_blank">
+  <img src="${solutionImages[id]}" style="
+    width:220px;
+    max-height:160px;
+    object-fit:cover;
+    border-radius:10px;
+    border:1px solid rgba(56,189,248,0.45);
+    display:block;
+    margin-top:8px;
+  ">
+</a>
   </div>
 `);
       }
