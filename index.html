@@ -14,15 +14,35 @@
     }
 
     body {
-        height: 100vh;
-        background: #0a0f1c;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: white;
-    }
+    height: 100vh;
+    background: #050914;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: url('images/storm-login.jpg') center center / cover no-repeat;
+    filter: blur(8px);
+    transform: scale(1.08);
+    opacity: 1;
+    z-index: 0;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: url('images/storm-login.jpg') center center / contain no-repeat;
+    z-index: 1;
+    pointer-events: none;
+}
 
     canvas {
         position: absolute;
@@ -32,8 +52,8 @@
 
     .card {
         position: relative;
-        background: rgba(255,255,255,0.05);
-        backdrop-filter: blur(25px);
+        background: rgba(10,15,25,0.68);
+        backdrop-filter: blur(14px);
         border-radius: 25px;
         padding: 50px;
         width: 420px;
@@ -105,16 +125,85 @@
         margin-top: 5px;
         letter-spacing: 1px;
     }
+/* AHMED FIX 2 - Real Rain + Lightning */
+/* AHMED FIX 3 - Hide bad rain overlay */
+.rain {
+    display: none;
+}
+    position: fixed;
+    inset: -120px 0 0 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.45;
+    background-image:
+        repeating-linear-gradient(
+            105deg,
+            rgba(255,255,255,0.35) 0px,
+            rgba(255,255,255,0.35) 1px,
+            transparent 1px,
+            transparent 18px
+        );
+    background-size: 18px 120px;
+    animation: rainFall 0.35s linear infinite;
+}
 
+.lightning {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(circle at 25% 15%, rgba(180,220,255,0.75), transparent 35%);
+    opacity: 0;
+    animation: lightningFlash 5s infinite;
+}
+
+@keyframes rainFall {
+    from {
+        transform: translate3d(0, -120px, 0);
+    }
+    to {
+        transform: translate3d(-40px, 120px, 0);
+    }
+}
+
+@keyframes lightningFlash {
+    0%, 88%, 100% { opacity: 0; }
+    89% { opacity: 0.9; }
+    90% { opacity: 0.05; }
+    91% { opacity: 0.65; }
+    92% { opacity: 0; }
+}
+/* AHMED EDIT 3 - Use storm image as full landing page */
+canvas,
+.card,
+.brand,
+.rain,
+.lightning {
+    display: none !important;
+}
+.entry-hotspot {
+    position: fixed;
+    left: 50%;
+    top: 61%;
+    transform: translate(-50%, -50%);
+    width: 310px;
+    height: 75px;
+    z-index: 999999;
+    border-radius: 50px;
+}
 </style>
 </head>
 
 <body>
 
 <canvas id="bg"></canvas>
+<div class="lightning"></div>
+<div class="rain"></div>
+<div class="lightning"></div>
+<div class="rain"></div>
 
 <div class="card">
-    <h1>🚀 مشروع</h1>
+    <h1>⛈️ مشروع الخفجي لتصريف الأمطار</h1>
 
     <p>
         مشروع دراسات والتصاميم و تخفيض منسوب المياه السطحية و درء أخطار السيول 
@@ -175,6 +264,6 @@
 
     setInterval(draw, 30);
 </script>
-
+<a href="map.html?v=20260517-arrows" class="entry-hotspot" title="الدخول إلى النظام"></a>
 </body>
 </html>
