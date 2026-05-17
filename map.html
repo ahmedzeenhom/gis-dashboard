@@ -839,7 +839,8 @@ if(nameAr){
   l.bindTooltip(nameAr, {
     permanent: false,
     direction: "center",
-    className: "district-label"
+offset: nameAr === "الخور" ? [0, 35] : [0, 0],
+className: "district-label"
   });
 
 }
@@ -862,15 +863,7 @@ function updateDistrictsVisibilityByZoom(){
     districtLayer.setStyle(function(f){
   const name = ((f.properties && f.properties.ArabicName) || "").trim();
 
-  if(name === "الخور"){
-    return {
-      color: "#111827",
-      weight: 0,
-      fillColor: "#000000",
-      fillOpacity: 0,
-      opacity: 0
-    };
-  }
+ 
 
   return {
     color: "#374151",
@@ -1440,7 +1433,13 @@ function drawPressureArrows(features){
 }
 function filterPressure(v){
 pressureLayer.clearLayers();
+
+if(map.hasLayer(pressureArrowsLayer)){
+  map.removeLayer(pressureArrowsLayer);
+}
+
 pressureArrowsLayer.clearLayers();
+pressureArrowsLayer.addTo(map);
 
 const filteredPressure = v==="all"
   ? P
@@ -1452,8 +1451,7 @@ features: filteredPressure
 });
 
 drawPressureArrows(filteredPressure);
-}
-/* ===== AHMED EDIT 18: فلتر محطات الرفع مع الحفاظ على الألوان ===== */
+}/* ===== AHMED EDIT 18: فلتر محطات الرفع مع الحفاظ على الألوان ===== */
 function filterElectric(v){
 electricLayer.clearLayers();
 
@@ -1632,7 +1630,7 @@ map.on('overlayremove', function(e) {
 
 buildDropdowns();
 });
-fetch('data/pressure_line.geojson')
+fetch('data/pressure_line.geojson?v=20260517-arrows')
 .then(r=>r.json())
 .then(d=>{
 P=d.features;
