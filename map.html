@@ -839,7 +839,8 @@ if(nameAr){
   l.bindTooltip(nameAr, {
     permanent: false,
     direction: "center",
-    className: "district-label"
+offset: nameAr === "الخور" ? [0, 35] : [0, 0],
+className: "district-label"
   });
 
 }
@@ -862,15 +863,7 @@ function updateDistrictsVisibilityByZoom(){
     districtLayer.setStyle(function(f){
   const name = ((f.properties && f.properties.ArabicName) || "").trim();
 
-  if(name === "الخور"){
-    return {
-      color: "#111827",
-      weight: 0,
-      fillColor: "#000000",
-      fillOpacity: 0,
-      opacity: 0
-    };
-  }
+ 
 
   return {
     color: "#374151",
