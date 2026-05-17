@@ -2,178 +2,2150 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project</title>
+<title>Unbreakable GIS UI v1</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.js"></script>
+/* ===== AHMED MARK 28: نهاية JavaScript ===== */
+</script>
 
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Segoe UI", Tahoma;
-    }
 
-    body {
-        height: 100vh;
-        background: #0a0f1c;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: white;
-    }
+/* ===== AHMED MARK 01: بداية CSS - شكل الصفحة بالكامل ===== */
+html,body{
+margin:0;
+height:100%;
+font-family:system-ui;
+overflow:hidden;
+background:#050814;
+}
 
-    canvas {
-        position: absolute;
-        top: 0;
-        left: 0;
-    }
+/* ===== AHMED MARK 02: شكل القائمة الجانبية SIDEBAR ===== */
+/* SIDEBAR */
+#sidebar{
+position:absolute;
+left:14px;
+top:42px;
+width:360px;
+height:auto;
+max-height:calc(100% - 56px);
+border-radius:14px;
+border-radius:18px;
+overflow-y:auto;
+transition:left 0.45s ease;
+background:rgba(2,6,23,0.35);
+backdrop-filter:blur(8px) brightness(1.25);
+-webkit-backdrop-filter:blur(8px) brightness(1.25);
+color:#e5e7eb;
+padding:14px;
+overflow:auto;
+border-right:2px solid rgba(56,189,248,0.25);
+z-index:1000;
+}
 
-    .card {
-        position: relative;
-        background: rgba(255,255,255,0.05);
-        backdrop-filter: blur(25px);
-        border-radius: 25px;
-        padding: 50px;
-        width: 420px;
-        text-align: center;
-        border: 1px solid rgba(255,255,255,0.1);
-        box-shadow: 0 0 60px rgba(0,255,200,0.2);
-        z-index: 2;
-    }
+/* ===== AHMED MARK 03: مكان الخريطة MAP ===== */
+/* MAP */
+#map{
+position:fixed;
+left:0;
+top:0;
+right:0;
+bottom:0;
+width:100vw;
+height:100vh;
+}
 
-    .card h1 {
-        font-size: 30px;
-        margin-bottom: 20px;
-        background: linear-gradient(90deg, #00f260, #0575e6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+/* ===== AHMED MARK 04: عنوان المشروع أعلى الخريطة ===== */
+/* PROJECT TITLE */
+#projectTitle{
+position:absolute;
+top:10px;
+left:400px;
+z-index:99999;
+background:#020617;
+color:#38bdf8;
+padding:10px 14px;
+border-left:4px solid #38bdf8;
+border-radius:10px;
+font-weight:800;
+}
 
-    .card p {
-        font-size: 14px;
-        line-height: 2;
-        opacity: 0.85;
-        margin-bottom: 40px;
-    }
+/* ===== AHMED MARK 05: اسمك أسفل يمين الشاشة ===== */
+/* BRAND (LOCKED) */
+/* ===== AHMED EDIT 47-B: Terrain legend floating position ===== */
+#terrainLegendBox{
+position:relative;
+left:auto;
+bottom:auto;
+z-index:99999;
+background:rgba(2,6,23,0.88);
+border:1px solid rgba(56,189,248,0.45);
+padding:6px;
+box-shadow:0 8px 20px rgba(0,0,0,0.35);}
 
-    .btn {
-        display: inline-block;
-        padding: 15px 40px;
-        border-radius: 50px;
-        background: linear-gradient(90deg, #00f260, #0575e6);
-        color: white;
-        text-decoration: none;
-        font-size: 15px;
-        letter-spacing: 1px;
-        transition: 0.3s;
-        box-shadow: 0 0 25px rgba(0,255,200,0.5);
-    }
+.terrain-legend-title{
+color:#ffffff;
+font-size:12px;
+font-weight:900;
+margin:6px 0 4px;
+}
 
-    .btn:hover {
-        transform: translateY(-5px) scale(1.07);
-        box-shadow: 0 0 45px rgba(0,255,200,0.9);
-    }
+.terrain-row{
+display:flex;
+align-items:center;
+gap:8px;
+color:#ffffff;
+font-size:11px;
+line-height:1.6;
+}
 
-    /* BRAND */
-    .brand {
-        margin-top: 25px;
-        text-align: center;
-        z-index: 2;
-    }
+.dem-gradient{
+width:18px;
+height:42px;
+border-radius:3px;
+background:linear-gradient(to bottom,#ec4899,#f97316,#facc15,#22c55e,#38bdf8);
+border:1px solid rgba(255,255,255,0.35);
+}
 
-    .brand a {
-        text-decoration: none;
-        font-size: 18px;
-        font-weight: bold;
-        letter-spacing: 2px;
-        background: linear-gradient(90deg, #00f260, #0575e6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        transition: 0.3s;
-    }
+.hillshade-gradient{
+width:18px;
+height:42px;
+border-radius:3px;
+background:linear-gradient(to bottom,#ffffff,#000000);
+border:1px solid rgba(255,255,255,0.35);
+}#brandBox{
+position:fixed;
+right:12px;
+bottom:12px;
+z-index:99999;
+background:#020617;
+color:#fff;
+border:1px solid #38bdf8;
+padding:10px;
+border-radius:10px;
+font-size:12px;
+}
+/* ===== AHMED EDIT 74-B: Contact Box under brand ===== */
+#contactBox{
+margin-top:10px;
+padding-top:10px;
+border-top:1px solid rgba(56,189,248,0.25);
+}
 
-    .brand a:hover {
-        filter: drop-shadow(0 0 10px #00f260);
-    }
+#contactToggleBtn{
+width:100%;
+background:rgba(2,6,23,0.95);
+color:#38bdf8;
+border:1px solid rgba(56,189,248,0.55);
+border-radius:8px;
+padding:7px 8px;
+font-size:11px;
+font-weight:900;
+cursor:pointer;
+text-shadow:0 0 8px rgba(56,189,248,0.45);
+}
 
-    .brand span {
-        display: block;
-        font-size: 12px;
-        opacity: 0.6;
-        margin-top: 5px;
-        letter-spacing: 1px;
-    }
+#contactToggleBtn:hover{
+background:#0f172a;
+color:#ffffff;
+}
 
+#contactContent{
+display:none;
+margin-top:8px;
+}
+
+#contactBox.contact-open #contactContent{
+display:block;
+}
+
+.contact-item{
+font-size:11px;
+line-height:1.7;
+color:#e5e7eb;
+word-break:break-word;
+}
+
+.contact-item{
+font-size:11px;
+line-height:1.7;
+color:#e5e7eb;
+word-break:break-word;
+}
+/* ===== AHMED MARK 06: شكل كروت الفلاتر في الشمال ===== */
+/* UI BLOCKS */
+.section-header{
+margin-top:12px;
+padding:10px;
+background:rgba(2,6,23,0.15);
+backdrop-filter:blur(8px) brightness(1.25);
+-webkit-backdrop-filter:blur(8px) brightness(1.25);
+border-radius:10px;
+border:1px solid rgba(56,189,248,0.22);
+}
+
+.section-header h3{
+margin:0;
+font-size:13px;
+color:#38bdf8;
+}
+
+.section-content{
+padding:10px;
+margin-top:6px;
+background:rgba(255,255,255,0.02);
+border-radius:10px;
+border:1px solid rgba(255,255,255,0.05);
+}
+/* ===== AHMED EDIT 66-A: Layer Order Panel Style ===== */
+.layer-order-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:8px;
+padding:8px;
+margin-top:6px;
+background:rgba(2,6,23,0.35);
+border:1px solid rgba(56,189,248,0.18);
+border-radius:10px;
+color:#ffffff;
+font-size:12px;
+font-weight:800;
+}
+
+.layer-order-name{
+flex:1;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.layer-order-btn{
+width:28px;
+height:28px;
+border-radius:8px;
+border:1px solid rgba(56,189,248,0.45);
+background:#020617;
+color:#38bdf8;
+font-weight:900;
+cursor:pointer;
+}
+
+.layer-order-btn:hover{
+background:#0f172a;
+color:#ffffff;
+}
+
+/* ===== AHMED MARK 07: شكل القوائم والاختيارات ===== */
+/* INPUTS */
+select,input{
+width:100%;
+box-sizing:border-box;
+padding:10px;
+margin-top:6px;
+background:rgba(2,6,23,0.75);
+color:#fff;
+border-radius:10px;
+border:1px solid rgba(56,189,248,0.35);
+font-weight:700;
+}select option{
+background:#0f172a;
+color:#ffffff;
+}
+
+/* ===== AHMED MARK 08: مكان ظهور زرار الطبقات ===== */
+/* LAYERS FIX */
+.leaflet-control{
+z-index:99999 !important;
+}
+
+.leaflet-top.leaflet-right{
+z-index:99999 !important;
+}
+/* ===== AHMED EDIT 01: تحسين شكل صندوق الطبقات يمين فوق ===== */
+.leaflet-control-layers{
+background:rgba(2,6,23,0.20) !important;
+backdrop-filter:blur(8px) brightness(1.35);
+-webkit-backdrop-filter:blur(8px) brightness(1.50);
+color:#ffffff !important;
+border-radius:14px !important;
+padding:12px !important;
+border:1px solid rgba(56,189,248,0.45) !important;
+box-shadow:0 10px 25px rgba(0,0,0,0.45) !important;
+font-size:14px !important;
+line-height:1.8 !important;
+backdrop-filter:blur(6px);
+}
+/* ===== AHMED EDIT 58-A: Professional layers title and hide button ===== */
+.layers-title-box,
+.hide-all-layers-box{
+width:210px !important;
+box-sizing:border-box !important;
+background:linear-gradient(135deg,rgba(2,6,23,0.98),rgba(15,23,42,0.95)) !important;
+color:#ffffff !important;
+border:1px solid rgba(56,189,248,0.65) !important;
+border-radius:14px !important;
+padding:10px 12px !important;
+box-shadow:0 10px 25px rgba(0,0,0,0.45) !important;
+text-align:center !important;
+}
+
+.layers-title-box{
+font-size:20px !important;
+font-weight:950 !important;
+letter-spacing:2px !important;
+color:#38bdf8 !important;
+text-shadow:0 0 10px rgba(56,189,248,0.65);
+margin-bottom:8px !important;
+cursor:pointer !important;
+user-select:none !important;
+}
+
+.hide-all-layers-box{
+margin-top:8px !important;
+}
+
+.hide-all-layers-box button{
+width:100%;
+background:linear-gradient(135deg,rgba(2,6,23,0.98),rgba(15,23,42,0.95));
+color:#38bdf8;
+border:1px solid rgba(56,189,248,0.65);
+border-radius:10px;
+padding:10px 12px;
+font-weight:950;
+letter-spacing:1px;
+cursor:pointer;
+text-shadow:0 0 10px rgba(56,189,248,0.65);
+box-shadow:0 0 14px rgba(56,189,248,0.18);
+}
+
+.hide-all-layers-box button:hover{
+background:#0f172a;
+color:#ffffff;
+}
+
+.leaflet-control-layers{
+width:250px !important;
+box-sizing:border-box !important;
+}
+
+.leaflet-control-layers label{
+color:#ffffff !important;
+margin-bottom:6px !important;
+cursor:pointer;
+display:flex !important;
+align-items:center !important;
+flex-direction:row !important;
+gap:8px !important;
+white-space:nowrap !important;
+}
+/* ===== AHMED EDIT 67-B: Layer order arrows inside Leaflet Layers ===== */
+.layer-control-order-btn{
+width:22px !important;
+height:22px !important;
+line-height:18px !important;
+border-radius:6px !important;
+border:1px solid rgba(56,189,248,0.45) !important;
+background:#020617 !important;
+color:#38bdf8 !important;
+font-size:13px !important;
+font-weight:900 !important;
+cursor:pointer !important;
+padding:0 !important;
+margin-left:4px !important;
+}
+
+.layer-control-order-btn:hover{
+background:#0f172a !important;
+color:#ffffff !important;
+}
+/* ===== AHMED EDIT 71-A: Zoom to layer button inside LAYERS ===== */
+.layer-zoom-btn{
+width:24px !important;
+height:24px !important;
+min-width:24px !important;
+border-radius:7px !important;
+border:1px solid rgba(56,189,248,0.55) !important;
+background:#020617 !important;
+color:#38bdf8 !important;
+font-size:12px !important;
+font-weight:950 !important;
+cursor:pointer !important;
+padding:0 !important;
+margin-left:auto !important;
+flex-shrink:0 !important;
+box-shadow:0 0 10px rgba(56,189,248,0.18) !important;
+}
+
+.layer-zoom-btn:hover{
+background:#0f172a !important;
+color:#ffffff !important;
+transform:scale(1.08);
+}
+.leaflet-control-layers input{
+width:auto !important;
+margin-right:8px !important;
+margin-left:0 !important;
+accent-color:#38bdf8;
+vertical-align:middle;
+}
+
+.leaflet-control-layers label{
+display:flex !important;
+align-items:center !important;
+gap:7px !important;
+font-size:13px !important;
+width:100% !important;
+box-sizing:border-box !important;
+}
+/* ===== AHMED EDIT 46-C: District Arabic labels ===== */
+/* ===== AHMED EDIT 53-C: Engineering Solutions labels ===== */
+.solution-label{
+  background:rgba(2,6,23,0.82);
+  color:#ffffff;
+  border:1px solid rgba(255,255,255,0.45);
+  border-radius:8px;
+  padding:3px 8px;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:0 4px 12px rgba(0,0,0,0.35);
+}
+/* ===== AHMED EDIT 65-A: Basin click label ===== */
+.basin-label{
+  background:rgba(2,6,23,0.82);
+  color:#ffffff;
+  border:1px solid rgba(255,255,255,0.45);
+  border-radius:8px;
+  padding:4px 9px;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:0 4px 12px rgba(0,0,0,0.35);
+outline:none !important;
+box-shadow:0 4px 12px rgba(0,0,0,0.35) !important;
+}
+/* ===== AHMED FIX 65-G: Remove Leaflet tooltip focus rectangle ===== */
+.leaflet-tooltip.basin-label,
+.leaflet-tooltip.basin-label:focus,
+.leaflet-tooltip.basin-label:active{
+outline:none !important;
+}
+
+.leaflet-interactive:focus{
+outline:none !important;
+}
+.district-label{
+  background:rgba(2,6,23,0.75);
+  color:#ffffff;
+  border:1px solid rgba(255,255,255,0.35);
+  border-radius:8px;
+  padding:3px 7px;
+  font-size:12px;
+  font-weight:800;
+  box-shadow:0 4px 12px rgba(0,0,0,0.35);
+}
+.leaflet-control-layers-separator{
+border-top:1px solid rgba(56,189,248,0.35) !important;
+}
+/* ===== AHMED EDIT 02: شكل مفتاح الألوان Legend ===== */
+#legendBox{
+position:fixed;
+left:400px;
+bottom:18px;
+z-index:99999;
+background:rgba(2,6,23,0.94);
+color:#ffffff;
+border:1px solid rgba(56,189,248,0.45);
+border-radius:14px;
+padding:12px 14px;
+font-size:13px;
+box-shadow:0 10px 25px rgba(0,0,0,0.45);
+min-width:150px;
+}
+
+#legendBox .legend-title{
+font-weight:800;
+color:#38bdf8;
+margin-bottom:8px;
+border-bottom:1px solid rgba(56,189,248,0.3);
+padding-bottom:6px;
+}
+
+#legendBox .legend-item{
+display:flex;
+align-items:center;
+gap:8px;
+margin:7px 0;
+}
+
+#legendBox .legend-color{
+width:16px;
+height:16px;
+border-radius:4px;
+border:1px solid rgba(255,255,255,0.5);
+display:inline-block;
+}
+/* ===== AHMED EDIT 20: زر إظهار وإخفاء القائمة الجانبية ===== */
+/* ===== AHMED FIX 73-C: Sidebar title outside panel ===== */
+#sidebarTitleBox{
+position:fixed;
+left:400px;
+top:12px;
+width:150px;
+text-align:center;
+z-index:999999;
+background:linear-gradient(135deg,rgba(2,6,23,0.98),rgba(15,23,42,0.95));
+color:#38bdf8;
+border:1px solid rgba(56,189,248,0.65);
+border-radius:14px;
+padding:9px 18px;
+font-size:15px;
+font-weight:950;
+letter-spacing:1px;
+text-shadow:0 0 10px rgba(56,189,248,0.65);
+box-shadow:0 10px 25px rgba(0,0,0,0.45);
+}
+
+body:not(.sidebar-hidden) #sidebarTitleBox{
+display:none !important;
+}
+
+body.sidebar-hidden #sidebarTitleBox{
+display:block !important;
+}#toggleSidebarBtn{
+position:fixed;
+left:395px;
+top:70px;
+z-index:999999;
+background:rgba(2,6,23,0.96);
+color:#ffffff;
+border:1px solid rgba(56,189,248,0.65);
+border-radius:12px;
+width:44px;
+height:44px;
+font-size:24px;
+font-weight:900;
+cursor:pointer;
+box-shadow:0 10px 25px rgba(0,0,0,0.50);
+transition:0.25s;
+}
+
+#toggleSidebarBtn:hover{
+background:#0f172a;
+transform:scale(1.06);
+}
+
+body.sidebar-hidden #sidebar{
+left:-420px;
+}
+
+body.sidebar-hidden #map{
+left:0;
+width:100vw;
+height:100vh;
+}
+
+body.sidebar-hidden #projectTitle{
+left:20px;
+}
+
+body.sidebar-hidden #legendBox{
+left:20px;
+}
+
+body.sidebar-hidden #toggleSidebarBtn{
+left:20px;
+}
+body.sidebar-hidden #sidebarTitleBox{
+left:20px;
+}
+/* ===== AHMED EDIT 25: ترتيب العنوان وزر القائمة حسب حالة الـ Sidebar ===== */
+
+/* الحالة العادية: القائمة ظاهرة */
+#projectTitle{
+top:12px !important;
+left:400px !important;
+padding:9px 15px !important;
+border-radius:12px !important;
+font-size:14px !important;
+box-shadow:0 8px 20px rgba(0,0,0,0.45);
+}
+
+#toggleSidebarBtn{
+left:455px !important;
+top:62px !important;
+width:42px !important;
+height:42px !important;
+border-radius:12px !important;
+}
+
+/* لما القائمة تكون مختفية */
+body.sidebar-hidden #projectTitle{
+left:22px !important;
+}
+
+body.sidebar-hidden #toggleSidebarBtn{
+left:75px !important;
+}
+body.sidebar-hidden #sidebarTitleBox{
+left:22px !important;
+}
+
+/* نقل أزرار الزووم بعيد عن الزحمة */
+.leaflet-top.leaflet-left{
+top:auto !important;
+left:auto !important;
+right:18px !important;
+bottom:155px !important;
+}
+/* تحسين شكل أزرار الزووم */
+.leaflet-control-zoom{
+border:none !important;
+box-shadow:0 8px 22px rgba(0,0,0,0.45) !important;
+}
+
+.leaflet-control-zoom a{
+background:#020617 !important;
+color:#38bdf8 !important;
+border:1px solid rgba(56,189,248,0.45) !important;
+font-weight:900 !important;
+}
+
+.leaflet-control-zoom a:hover{
+color:#ffffff !important;
+}
+background:#0f172a !important;
+color:#ffffff !important;
+}
+/* ===== AHMED EDIT 26: تنسيق عنوان المشروع على سطرين ===== */
+#projectTitle{
+text-align:center !important;
+line-height:1.4 !important;
+}
+
+#projectTitle span{
+display:block;
+color:#38bdf8;
+font-weight:900;
+font-size:16px;
+letter-spacing:1px;
+}
+/* ===== AHMED EDIT 27: تصميم احترافي لعنوان المشروع ===== */
+#projectTitle{
+background:linear-gradient(135deg,rgba(2,6,23,0.98),rgba(15,23,42,0.95)) !important;
+color:#ffffff !important;
+border:1px solid rgba(56,189,248,0.55) !important;
+border-right:4px solid #38bdf8 !important;
+border-left:4px solid #38bdf8 !important;
+border-radius:14px !important;
+padding:9px 18px !important;
+min-width:135px;
+text-align:center !important;
+line-height:1.25 !important;
+box-shadow:0 10px 25px rgba(0,0,0,0.55), 0 0 18px rgba(56,189,248,0.18);
+}
+
+#projectTitle .project-name{
+font-size:14px;
+font-weight:800;
+color:#e0f2fe;
+letter-spacing:0.2px;
+white-space:nowrap;
+}
+
+#projectTitle .project-gis{
+font-size:19px;
+font-weight:950;
+color:#38bdf8;
+letter-spacing:2px;
+margin-top:2px;
+text-shadow:0 0 10px rgba(56,189,248,0.7);
+}
+/* ===== AHMED EDIT 60-H: Start layers panel collapsed without flash ===== */
+body.layers-collapsed .leaflet-control-layers,
+body.layers-collapsed .hide-all-layers-box{
+display:none !important;
+}
+
+/* ===== AHMED EDIT 64-C: Full extent button above zoom buttons ===== */
+.full-extent-control{
+margin-bottom:0 !important;
+box-shadow:0 8px 22px rgba(0,0,0,0.45) !important;
+border:none !important;
+}
+.full-extent-control a,
+.leaflet-bar.full-extent-control a,
+.leaflet-bar.full-extent-control a:visited{
+width:30px !important;
+height:30px !important;
+line-height:30px !important;
+font-size:18px !important;
+text-align:center !important;
+background-color:#020617 !important;
+background:#020617 !important;
+color:#38bdf8 !important;
+border:1px solid rgba(56,189,248,0.45) !important;
+display:block !important;
+text-decoration:none !important;
+font-weight:900 !important;
+}
+.full-extent-control a:hover,
+.leaflet-bar.full-extent-control a:hover{
+background:#0f172a !important;
+color:#ffffff !important;
+}
 </style>
 </head>
 
-<body>
+<!-- ===== AHMED EDIT 23: فتح الموقع والقائمة الجانبية مخفية تلقائيًا ===== -->
+<body class="sidebar-hidden layers-collapsed">
 
-<canvas id="bg"></canvas>
+<!-- ===== AHMED MARK 10: عنوان المشروع في أعلى الخريطة ===== -->
+<!-- TITLE -->
+<!-- ===== AHMED EDIT 26: تعديل عنوان المشروع ===== -->
+<!-- ===== AHMED EDIT 27: عنوان المشروع بشكل احترافي ===== -->
 
-<div class="card">
-    <h1>🚀 مشروع</h1>
+<!-- ===== AHMED EDIT 21: زر إظهار وإخفاء القائمة ===== -->
+<div id="sidebarTitleBox">البحث العام</div>
+<button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
+<!-- ===== AHMED EDIT 08: زر الرجوع للمشروع في مكان مستقل ===== -->
+<!-- ===== AHMED MARK 11: صندوق اسم أحمد أسفل يمين ===== -->
+<!-- BRAND (UNBREAKABLE) -->
+<div id="brandBox">
+  AHMED ZEEN<br>
+  GIS SPECIALIST
 
-    <p>
-        مشروع دراسات والتصاميم و تخفيض منسوب المياه السطحية و درء أخطار السيول 
-        و شبكة تصريف مياه الأمطار بمحافظة الخفجي و المراكز التابعة لها
-    </p>
+    </div>
+<!-- ===== AHMED EDIT 47-A: Terrain legend floating on map ===== -->
+<!-- ===== AHMED EDIT 05: زر الرجوع لحدود المشروع ===== -->
+<!-- ===== AHMED EDIT 02: مفتاح ألوان استخدامات الأراضي ===== -->
+<div id="legendBox">
+  <div class="legend-title">مفتاح الألوان</div>
 
-    <a href="map.html" class="btn">
-        الدخول إلى النظام
-    </a>
+  <div class="legend-item">
+    <span class="legend-color" style="background:#facc15"></span>
+    <span>سكني</span>
+  </div>
+
+  <div class="legend-item">
+    <span class="legend-color" style="background:#ef4444"></span>
+    <span>تجاري</span>
+  </div>
+
+  <div class="legend-item">
+    <span class="legend-color" style="background:#a855f7"></span>
+    <span>صناعي</span>
+  </div>
+
+  <div class="legend-item">
+    <span class="legend-color" style="background:#38bdf8"></span>
+    <span>خدمات</span>
+  </div>
+
+  <div class="legend-item">
+    <span class="legend-color" style="background:#22c55e"></span>
+    <span>المرافق</span>
+  </div>
 </div>
 
-<div class="brand">
-    <a href="#" target="_blank">AHMED ZEEN</a>
-    <span>GIS SPECIALIST</span>
-</div>
+<!-- ===== AHMED MARK 12: القائمة الجانبية اليسار ===== -->
+<!-- SIDEBAR -->
+<div id="sidebar"></div>
+
+<!-- ===== AHMED MARK 13: مكان الخريطة ===== -->
+<!-- MAP -->
+<div id="map"></div>
 
 <script>
-    const canvas = document.getElementById("bg");
-    const ctx = canvas.getContext("2d");
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+/* ===== AHMED MARK 14: بداية JavaScript - وظائف الخريطة ===== */
 
-    let particles = [];
+/* ===== AHMED MARK 15: إعداد الخريطة ومكان البداية ===== */
+/* ================= MAP ================= */
+const map = L.map('map', {
+  zoomSnap: 0.25,
+  zoomDelta: 0.25,
+  minZoom: 7,
+  maxBounds: [
+    [23.0, 46.0],
+    [30.8, 51.5]
+  ],
+  maxBoundsViscosity: 1.0
+}).setView([28.42, 48.49], 11.5);
+const imagery = L.tileLayer(
+'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+{
+  noWrap:true,
+  bounds:[[-85,-180],[85,180]]
+}
+).addTo(map);/* ===== AHMED EDIT 38-A: خلفية فاضية لإخفاء الصورة الجوية ===== */
+/* ===== AHMED EDIT 36-A: إضافة طبقة Hillshade من XYZ Tiles ===== */
+/* ===== AHMED EDIT 37: منع اختفاء Hillshade بعد مستوى الزووم المتاح ===== */
+/* ===== AHMED EDIT 37: Hillshade Tiles بجودة أعلى حتى زووم 17 ===== */
+// ===== AHMED EDIT 37: Hillshade Tiles =====
+const hillshadeLayer = L.tileLayer(
+  'tiles/{z}/{x}/{y}.png',
+  {
+    opacity: 0.45,
+    attribution: 'Hillshade',
+    minZoom: 10,
+    maxNativeZoom: 17,
+    maxZoom: 20
+  }
+);
 
-    for (let i = 0; i < 80; i++) {
-        particles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            r: Math.random() * 2,
-            d: Math.random() * 1
-        });
+// ===== AHMED EDIT 39: DEM Layer =====
+const demLayer = L.tileLayer(
+  'https://ahmedzeenhom.github.io/gis-dashboard/dem/{z}/{x}/{y}.png',
+  {
+    attribution: 'DEM',
+    opacity: 0.65,
+    maxZoom: 20,
+    maxNativeZoom: 16
+  }
+);
+// ===== AHMED EDIT 56-A: DEM disabled on startup =====
+// demLayer.addTo(map);// ===== AHMED EDIT 40: Keep DEM above Hillshade =====
+demLayer.bringToFront();
+;/* ===== AHMED MARK 16: أماكن تخزين بيانات الطبقات بعد التحميل ===== */
+/* ================= DATA ================= */
+let K=[],N=[],P=[],E=[],D=[],B=[];
+
+/* ===== AHMED MARK 17: تعريف طبقات الخريطة ===== */
+/* ================= LAYERS ================= */
+let landLayer=L.geoJSON(null).addTo(map);
+// ===== AHMED EDIT 46-B: Districts Layer with Arabic Labels =====
+let districtLayer = L.geoJSON(null, {
+ style: {
+  color: "#9ca3af",
+  weight: 1,
+  fillColor: "#000000",
+  fillOpacity: 0,
+  opacity: 0
+},
+  onEachFeature: function (f, l) {
+    const p = f.properties || {};
+  // ===== AHMED EDIT 46-H: Hide district label if ArabicName is empty =====
+// ===== AHMED EDIT 46-J: Treat empty / بدون اسم as no label =====
+const rawDistrictName = (p.ArabicName || "").trim();
+// ===== AHMED EDIT 46-L: Hide الحرس الوطني district =====
+if(rawDistrictName === "الحرس الوطني"){
+    return;
+}
+
+const nameAr = rawDistrictName === "بدون اسم" ? "" : rawDistrictName;
+
+if(nameAr){
+  l.bindTooltip(nameAr, {
+    permanent: false,
+    direction: "center",
+    className: "district-label"
+  });
+
+}
+
+    l.bindPopup(`
+      <div style="direction:rtl;text-align:right;min-width:180px">
+        <h3 style="margin:0 0 8px;color:#0f172a">بيانات الحي</h3>
+        <div><b>اسم الحي:</b> ${nameAr || "غير معروف"}</div>
+      </div>
+    `);
+  }
+});
+// ===== AHMED EDIT 46-I: Show Districts by default =====
+districtLayer.addTo(map);
+// ===== AHMED EDIT 50-A: Districts visible only after zoom in =====
+const districtsMinVisibleZoom = 13;
+
+function updateDistrictsVisibilityByZoom(){
+  if(map.getZoom() >= districtsMinVisibleZoom){
+    districtLayer.setStyle(function(f){
+  const name = ((f.properties && f.properties.ArabicName) || "").trim();
+
+  if(name === "الخور"){
+    return {
+      color: "#111827",
+      weight: 0,
+      fillColor: "#000000",
+      fillOpacity: 0,
+      opacity: 0
+    };
+  }
+
+  return {
+    color: "#374151",
+    weight: 2,
+    fillColor: "#000000",
+    fillOpacity: 0,
+    opacity: 0.85
+  };
+});
+    districtLayer.eachLayer(function(layer){
+      if(layer.getTooltip()){
+        layer.openTooltip();
+      }
+    });
+  } else {
+    districtLayer.setStyle({
+      opacity: 0,
+      fillOpacity: 0
+    });
+    districtLayer.eachLayer(function(layer){
+      if(layer.getTooltip()){
+        layer.closeTooltip();
+      }
+    });
+  }
+}
+
+map.on("zoomend", updateDistrictsVisibilityByZoom);
+// ===== AHMED EDIT 48-G: Clean Boundary Layer =====
+let boundaryLayer = L.geoJSON(null,{
+  interactive:false,
+  style:function(){
+    return{
+      color:"#ffffff",
+      weight:2,
+      fillOpacity:0,
+      opacity:1
+    };
+  }
+});
+
+boundaryLayer.addTo(map);
+// ===== AHMED EDIT 48-B: Al Khafji boundary layer =====
+/* ===== AHMED EDIT 04: Popups للشبكات وخطوط الطرد ومحطات الرفع ===== */
+// ===== AHMED EDIT 51-A: Roads Layer =====
+// ===== AHMED EDIT 53-A: Engineering Solutions layers =====
+const solutionLayers = L.layerGroup().addTo(map);
+// ===== AHMED EDIT 57-A: Open Channel layer =====
+const openChannelLayer = L.geoJSON(null,{
+  style:{
+  color:"#3b82f6",
+  weight:4,
+  opacity:1
+},
+
+  onEachFeature:function(f,l){
+
+    l.bindPopup(`
+<div style="direction:rtl;text-align:right;min-width:180px">
+  <h3 style="margin:0 0 8px;color:#0f172a">القناة المفتوحة</h3>
+  <div><b>الوصف:</b> قناة مفتوحة قائمة</div>
+
+<br>
+
+<a href="data/open-channel.png" target="_blank">
+  <img src="data/open-channel.png" style="
+    width:220px;
+    max-height:160px;
+    object-fit:cover;
+    border-radius:10px;
+    border:1px solid rgba(56,189,248,0.45);
+    display:block;
+    margin-top:8px;
+  ">
+</a>
+</div>
+`);
+
+  }
+});
+function solutionStyle(id){
+  const styles = {
+    1: "#2563eb",
+    2: "#ef4444",
+    3: "#f59e0b",
+    4: "#22c55e"
+  };
+
+  return {
+    color: styles[id] || "#ffffff",
+    weight: 6,
+    opacity: 1,
+    dashArray: "8,8"
+  };
+}
+// ===== AHMED EDIT 65-B: BASIN Layer with click label =====
+const basinColors = [
+  "#6ee7b7",
+  "#a78bfa",
+  "#f87171",
+  "#fde68a",
+  "#86efac",
+  "#93c5fd",
+  "#c4b5fd",
+  "#f9a8d4",
+  "#bef264",
+  "#67e8f9"
+];
+
+let activeBasinLabel = null;
+let basinColorIndex = 0;
+
+let basinLayer = L.geoJSON(null,{
+  style:function(f){
+    if(!f.properties){
+      f.properties = {};
     }
 
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "white";
-        ctx.globalAlpha = 0.6;
-
-        particles.forEach(p => {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        update();
+    if(typeof f.properties._basinColorIndex === "undefined"){
+      f.properties._basinColorIndex = basinColorIndex++;
     }
 
-    function update() {
-        particles.forEach(p => {
-            p.y += p.d;
-            if (p.y > canvas.height) {
-                p.y = 0;
-                p.x = Math.random() * canvas.width;
-            }
-        });
+    return{
+      color:"#4b5563",
+      weight:1.2,
+      fillColor:basinColors[f.properties._basinColorIndex % basinColors.length],
+      fillOpacity:0.45,
+      opacity:0.75
+    };
+  },
+
+  onEachFeature:function(f,l){
+    const p = f.properties || {};
+    const name = p.EnglishName || "Unknown";
+
+    l.bindTooltip(name,{
+      permanent:false,
+      direction:"center",
+      className:"basin-label",
+      opacity:1
+    });
+
+    l.on("click", function(){
+      if(activeBasinLabel && activeBasinLabel !== l){
+        activeBasinLabel.closeTooltip();
+      }
+
+      l.openTooltip();
+      activeBasinLabel = l;
+    });
+  }
+}).addTo(map);
+// ===== AHMED EDIT 70-A: Streams Layer =====
+let streamsLayer = L.geoJSON(null,{
+  style:{
+    color:"#1e88ff",
+    weight:1.8,
+    opacity:1
+  },
+  onEachFeature:function(f,l){
+    l.bindPopup(`
+      <div style="direction:rtl;text-align:right;min-width:180px">
+        <h3 style="margin:0 0 8px;color:#0f172a">Streams</h3>
+        <div><b>النوع:</b> مجاري سيول</div>
+      </div>
+    `);
+  }
+}).addTo(map);
+let roadsLayer = L.geoJSON(null,{
+  style:function(){
+    return{
+      color:"#1a1a1a",
+           weight:1.4,
+           fillColor:"#6b7280",
+           fillOpacity:0.88,
+           opacity:1
+    };
+  }
+});
+// ===== AHMED EDIT 51-D: Show Roads by default =====
+roadsLayer.addTo(map);
+// ===== AHMED EDIT 55-A: Network colors by NO =====
+function networkColor(no){
+  no = String(no || "").trim();
+
+  const colors = {
+  "1": "#2563eb", // أزرق
+  "2": "#ef4444", // أحمر
+  "3": "#ff00ff", // ماجنتا
+  "4": "#22c55e", // أخضر
+  "5": "#facc15", // أصفر
+  "6": "#a855f7", // بنفسجي
+  "7": "#fb923c"  // برتقالي
+};
+
+  return colors[no] || "#38bdf8";
+}
+let networkLayer=L.geoJSON(null,{
+style:function(f){
+  const no = f.properties ? f.properties.NO : "";
+  return {
+    color: networkColor(no),
+    weight: 2.5,
+    opacity: 1
+  };
+},
+onEachFeature:function(f,l){
+
+let p=f.properties || {};
+let no=p.NO || "غير معروف";
+
+l.bindPopup(`
+<div style="direction:rtl;text-align:right;min-width:200px">
+    <h3 style="margin:0 0 8px;color:#0f172a">بيانات الشبكة</h3>
+    <div><b>رقم الشبكة:</b> KH-N-0${no}</div>
+</div>
+`);
+
+}
+}).addTo(map);
+
+// ===== AHMED EDIT 62-A: Force Mains arrows layer group =====
+let pressureArrowsLayer = L.layerGroup();
+let pressureLayer=L.geoJSON(null,{
+style:{color:"#000",weight:3,opacity:1,dashArray:"10 8"},
+onEachFeature:function(f,l){
+
+let p=f.properties || {};
+let des=p.des || "غير معروف";
+
+l.bindPopup(`
+<div style="direction:rtl;text-align:right;min-width:200px">
+    <h3 style="margin:0 0 8px;color:#0f172a">بيانات خط الطرد</h3>
+    <div><b>الوصف:</b> ${des}</div>
+</div>
+`);
+
+}
+}).addTo(map);
+
+
+/* ===== AHMED EDIT 17: تلوين محطات الرفع حسب الحالة ===== */
+function electricColor(status){
+status = String(status || "").trim();
+
+if(status === "1"){
+    return "#22c55e"; // قائمة - أخضر
+}
+
+if(status === "3"){
+    return "#ef4444"; // مقترحة - أحمر
+}
+
+return "#38bdf8"; // غير معروف - أزرق
+}
+
+let electricLayer=L.geoJSON(null,{
+style:function(f){
+let status = f.properties ? f.properties.StructureStatus : "";
+
+return {
+color:electricColor(status),
+fillColor:electricColor(status),
+weight:3,
+fillOpacity:0.65
+};
+},
+
+pointToLayer:function(f,latlng){
+let status = f.properties ? f.properties.StructureStatus : "";
+
+return L.circleMarker(latlng,{
+radius:9,
+color:electricColor(status),
+fillColor:electricColor(status),
+weight:3,
+fillOpacity:0.9
+});
+},
+
+onEachFeature:function(f,l){
+
+let p=f.properties || {};
+let status=p.StructureStatus || "غير معروف";
+let pumpName = p.PumpStationName || "غير معروف";
+
+let statusText="غير معروف";
+
+if(String(status)==="1"){
+statusText="🟢 قائمة";
+}
+
+if(String(status)==="3"){
+statusText="🔴 مقترحة";
+}
+
+l.bindPopup(`
+<div style="direction:rtl;text-align:right;min-width:200px">
+    <h3 style="margin:0 0 8px;color:#0f172a">محطة الرفع رقم ${pumpName}</h3>
+<div><b>الحالة:</b> ${statusText}</div>
+</div>
+`);
+
+}
+}).addTo(map);
+/* ===== AHMED MARK 18: ألوان استخدامات الأراضي ===== */
+/* ================= COLORS ================= */
+/* ===== AHMED EDIT 10: تحسين تصنيف ألوان استخدامات الأراضي ===== */
+function color(v){
+v=String(v||"").trim();
+
+/* أي قيمة فيها كلمة سكن تعتبر سكني، مثل: سكني عامة */
+if(v.includes("سكن")) return "#facc15";
+
+if(v.includes("تجار")) return "#ef4444";
+if(v.includes("صناع")) return "#a855f7";
+if(v.includes("خدم")) return "#38bdf8";
+if(v.includes("مرافق") || v.includes("المرافق")) return "#22c55e";
+
+return "#64748b";
+}
+
+/* ===== AHMED MARK 19: شكل أيقونات محطات الرفع ===== */
+/* ================= ELECTRIC ICON ================= */
+function pin(status){
+let ok=String(status)==="1";
+let c=ok?"#00ff6a":"#ff1744";
+
+return L.divIcon({
+html:`
+<div style="position:relative">
+<div style="
+width:56px;height:56px;
+background:${c};
+border-radius:50% 50% 50% 0;
+transform:rotate(-45deg);
+border:5px solid white;
+box-shadow:0 10px 20px rgba(0,0,0,0.6);
+"></div>
+<div style="
+position:absolute;
+top:20px;left:20px;
+width:14px;height:14px;
+background:white;
+border-radius:50%;
+"></div>
+</div>
+`,
+iconSize:[56,56],
+iconAnchor:[28,56]
+});
+}
+
+/* ===== AHMED MARK 20: رسم طبقة استخدامات الأراضي ===== */
+/* ================= SAFE RENDER ================= */
+function renderLand(data){
+landLayer.clearLayers();
+
+landLayer.addData({
+type:"FeatureCollection",
+features:data
+});
+/* ===== AHMED EDIT 05: دالة الرجوع لحدود المشروع ===== */
+/* ===== AHMED EDIT 14: إصلاح زر الرجوع لحدود المشروع بطريقة أقوى ===== */
+function zoomToProject(){
+
+let bounds = null;
+
+try{
+    if(K && K.length > 0){
+        bounds = L.geoJSON({
+            type:"FeatureCollection",
+            features:K
+        }).getBounds();
+    }
+}catch(e){
+    console.log("Zoom bounds error:", e);
+}
+
+if(bounds && bounds.isValid()){
+    map.fitBounds(bounds,{
+        padding:[40,40],
+        maxZoom:16
+    });
+}else{
+    alert("حدود المشروع لم يتم تحميلها بعد. انتظر ثواني وجرب مرة أخرى.");
+}
+
+}landLayer.eachLayer(function(layer){
+
+let useValue = layer.feature.properties.USE || "غير معروف";
+
+/* ===== AHMED EDIT 07: Popup أوضح لمعرفة سبب القطع غير الملونة ===== */
+
+layer.bindPopup(`
+<div style="direction:rtl;text-align:right;min-width:220px">
+    <h3 style="margin:0 0 8px;color:#0f172a">بيانات قطعة الأرض</h3>
+    <div><b>الاستخدام:</b> ${useValue}</div>
+    
+</div>
+`);
+layer.on("mouseover", function(){
+layer.setStyle({
+weight:3,
+color:"#ffffff",
+fillOpacity:0.9
+});
+});
+
+layer.on("mouseout", function(){
+/* ===== AHMED EDIT 16: منع رجوع القطع للشكل الأزرق الافتراضي ===== */
+layer.setStyle({
+fillColor:color(layer.feature.properties.USE),
+color:"#111",
+weight:1,
+fillOpacity:0.6
+});
+});
+
+});
+
+landLayer.setStyle(f=>({
+fillColor:color(f.properties.USE),
+color:"#111",
+weight:1,
+fillOpacity:0.6
+}));
+}
+
+/* ===== AHMED MARK 21: محتوى القائمة الجانبية والفلاتر ===== */
+/* ================= UNBREAKABLE UI BUILDER ================= */
+function buildUI(){
+
+document.getElementById("sidebar").innerHTML = `
+
+<div class="section-header">
+
+<div class="layers-title-box" style="width:100% !important;margin-bottom:14px !important;">
+البحث العام
+</div>
+<div class="section-header">
+<h3>استخدامات الاراضي</h3>
+<select id="useFilter" onchange="filterUSE()">
+<option value="all">All</option>
+<option>سكني</option>
+<option>تجاري</option>
+<option>صناعي</option>
+<option>خدمات</option>
+<option>المرافق</option>
+</select>
+</div>
+
+<div class="section-header">
+<h3>الشبكات</h3>
+<select id="networkFilter" onchange="filterNetwork(this.value)">
+<option value="all">All</option>
+</select>
+</div>
+
+<div class="section-header">
+<h3>خطوط الطرد</h3>
+<select id="pressureFilter" onchange="filterPressure(this.value)">
+<option value="all">All</option>
+</select>
+</div>
+
+<div class="section-header">
+<h3>محطات الرفع</h3>
+<select id="electricFilter" onchange="filterElectric(this.value)">
+<option value="all">All</option>
+<option value="1">🟢 قائمة</option>
+<option value="3">🔴 مقترحة</option>
+</select>
+</div>
+
+<div class="section-header">
+<h3>السطوع والتباين</h3>
+<input type="range" id="b" min="50" max="150" value="100">
+<input type="range" id="c" min="50" max="150" value="100">
+</div>
+<!-- ===== AHMED EDIT 66-B: Layer Order Panel disabled ===== -->
+<div class="section-header" style="display:none;">
+<h3>ترتيب الطبقات</h3>
+<div id="layerOrderPanel"></div>
+</div>
+<!-- ===== AHMED EDIT 42-F: DEM and Hillshade opacity sliders in sidebar ===== -->
+<div class="section-header" id="terrainOpacityBox" style="display:none;">
+
+<label>شفافية نموذج الارتفاعات</label>
+<input type="range" id="demOpacity" min="0" max="1" step="0.05" value="0.65">
+
+<label>شفافية الظلال التضاريسية</label><input type="range" id="hillshadeOpacity" min="0" max="1" step="0.05" value="0.45">
+<div id="terrainLegendBox">
+  <div class="terrain-legend-title">DEM</div>
+  <div class="terrain-row">
+    <div class="dem-gradient"></div>
+    <div>
+      <div>167.58</div>
+      <div>-0.82</div>
+    </div>
+  </div>
+
+  <div class="terrain-legend-title">Hillshade</div>
+  <div class="terrain-row">
+    <div class="hillshade-gradient"></div>
+    <div>
+      <div>254</div>
+      <div>0</div>
+    </div>
+  </div>
+</div>
+
+`;
+}
+
+/* ===== AHMED MARK 22: وظائف الفلاتر ===== */
+/* ================= SAFE FILTERS ================= */
+function filterUSE(){
+let v=useFilter.value;
+renderLand(v==="all"?K:K.filter(x=>String(x.properties.USE).includes(v)));
+}
+
+function filterNetwork(v){
+networkLayer.clearLayers();
+networkLayer.addData({
+type:"FeatureCollection",
+features: v==="all"?N:N.filter(x=>String(x.properties.NO)==v)
+});
+}
+
+function filterPressure(v){
+pressureLayer.clearLayers();
+pressureLayer.addData({
+type:"FeatureCollection",
+features: v==="all"?P:P.filter(x=>String(x.properties.des)==v)
+});
+}
+
+/* ===== AHMED EDIT 18: فلتر محطات الرفع مع الحفاظ على الألوان ===== */
+function filterElectric(v){
+electricLayer.clearLayers();
+
+electricLayer.addData({
+type:"FeatureCollection",
+features: v==="all"?E:E.filter(x=>String(x.properties.StructureStatus)==v)
+});
+}
+/* ===== AHMED MARK 23: تعبئة القوائم تلقائي من البيانات ===== */
+/* ================= DROPDOWN AUTO FIX ================= */
+function buildDropdowns(){
+
+networkFilter.innerHTML=`<option value="all">All</option>`;
+[...new Set(N.map(x=>x.properties.NO))]
+.sort((a,b)=>Number(a)-Number(b))
+.forEach(v=>{
+networkFilter.innerHTML+=`<option value="${v}">${v}</option>`;
+});
+
+pressureFilter.innerHTML=`<option value="all">All</option>`;
+[...new Set(P.map(x=>x.properties.des))]
+.sort((a,b)=>Number(a)-Number(b))
+.forEach(v=>{
+pressureFilter.innerHTML+=`<option value="${v}">${v}</option>`;
+});
+}
+
+/* ===== AHMED MARK 24: السطوع والتباين ===== */
+/* ================= BRIGHTNESS SAFE ================= */
+function bindBrightness(){
+
+function update(){
+document.querySelector(".leaflet-tile-pane").style.filter=
+`brightness(${b.value}%) contrast(${c.value}%)`;
+}
+
+b.oninput=update;
+c.oninput=update;
+}
+
+/* ===== AHMED MARK 25: تحميل ملفات البيانات من فولدر data ===== */
+/* ================= LOAD DATA ================= */
+fetch('data/alkhafje.geojson')
+.then(r=>r.json())
+.then(d=>{
+K=d.features;
+renderLand(K);
+// ===== AHMED EDIT 49-A: Disabled old zoom to Land Use =====
+// map.fitBounds(landLayer.getBounds());
+});
+// ===== AHMED EDIT 51-B: Load Roads GeoJSON =====
+// ===== AHMED EDIT 53-B: Load Engineering Solutions =====
+[
+  'data/Solution 1.json',
+  'data/Solution 2.json',
+  'data/Solution 3.json',
+  'data/Solution 4.json'
+].forEach(function(url){
+  fetch(url)
+  .then(r=>r.json())
+  .then(d=>{
+    L.geoJSON(d,{
+      style:function(f){
+        const id = f.properties.SolutionID;
+        return solutionStyle(id);
+      },
+      onEachFeature:function(f,l){
+        const id = f.properties.SolutionID || "";
+const solutionImages = {
+  1: "data/KH-F-P01-S2-D001.png",
+  2: "data/KH-F-P02-S1-D001.png",
+  3: "data/KH-F-P03-S1-D001.png",
+  4: "data/KH-F-P04-S1-D001.png"
+};
+const solutionDescriptions = {
+  1: "انشاء عبارة صندوقية لدرء أخطار السيول - من أسكان الخفجي (القناة المفتوحة القائمة)حتي خور الخفجي",
+  2: "قناة مفتوحة  شرق الطريق الدولي لحماية منطقة الكليات",
+  3: "انشاء قناة مفتوحة لدرء أخطار السيول - غرب حي السلام",
+  4: "إنشاء قناة مفتوحة لتوجيه مسار المياه إلى الناحية الشرقية أراضي فضاء بطول 1 كلم"
+};
+
+
+l.bindPopup(`
+  <div style="
+    direction:rtl;
+    text-align:right;
+    font-family:Arial;
+    min-width:220px;
+  ">
+    <b>مشروع رقم KH-F-P0${id}</b>
+    <hr style="margin:6px 0;">
+    ${solutionDescriptions[id] || "لا يوجد وصف"}
+
+<br><br>
+
+<a href="${solutionImages[id]}" target="_blank">
+  <img src="${solutionImages[id]}" style="
+    width:220px;
+    max-height:160px;
+    object-fit:cover;
+    border-radius:10px;
+    border:1px solid rgba(56,189,248,0.45);
+    display:block;
+    margin-top:8px;
+  ">
+</a>
+  </div>
+`);
+      }
+    }).addTo(solutionLayers);
+keepSolutionsOnTop();
+  });
+});
+// ===== AHMED EDIT 57-B: Load Open Channel =====
+fetch('data/openchanel.geojson')
+.then(r=>r.json())
+.then(d=>{
+  openChannelLayer.addData(d);
+if(map.hasLayer(solutionLayers)){
+  openChannelLayer.addTo(map);
+}
+});
+// ===== AHMED EDIT 65-C: Load BASIN GeoJSON =====
+// ===== AHMED EDIT 70-B: Load Streams GeoJSON =====
+fetch('data/Streams.geojson?v=20260513')
+.then(r=>r.json())
+.then(d=>{
+  streamsLayer.addData(d);
+});
+fetch('data/BASIN.geojson?v=20260513')
+.then(r=>r.json())
+.then(d=>{
+  B = d.features;
+  basinLayer.addData(d);
+
+  // ===== AHMED EDIT 69-A: Initial zoom extent to BASIN =====
+    if(basinLayer.getBounds && basinLayer.getBounds().isValid()){
+    map.fitBounds(basinLayer.getBounds(), {
+  padding:[35,35],
+  maxZoom:15,
+  animate:false
+});
+
+// ===== AHMED FIX 69-E: Pan map slightly left after BASIN zoom =====
+map.panBy([100, 0], {
+  animate:false
+});
+  }
+});
+fetch('data/roads.geojson?v=20260513')
+.then(r=>r.json())
+.then(d=>{
+    roadsLayer.addData(d);
+});
+fetch('data/alkhafje-network.json')
+.then(r=>r.json())
+.then(d=>{
+N=d.features;
+networkLayer.addData(d);
+// ===== AHMED EDIT 45-H: Sync Force Mains arrows with layer =====
+if (map.hasLayer(pressureLayer)) {
+  pressureArrowsLayer.addTo(map);
+}
+
+map.on('overlayadd', function(e) {
+  if (e.layer === pressureLayer && pressureArrowsLayer) {
+    map.addLayer(pressureArrowsLayer);
+  }
+});
+
+map.on('overlayremove', function(e) {
+  if (e.layer === pressureLayer && pressureArrowsLayer) {
+    map.removeLayer(pressureArrowsLayer);
+  }
+});
+
+buildDropdowns();
+});
+fetch('data/pressure_line.geojson')
+.then(r=>r.json())
+.then(d=>{
+P=d.features;
+pressureLayer.addData(d);
+d.features.forEach(function(feature){
+  if (!feature.geometry) return;
+
+  var lines = feature.geometry.type === "MultiLineString"
+    ? feature.geometry.coordinates
+    : [feature.geometry.coordinates];
+
+    lines.forEach(function(line){
+    // ===== AHMED FIX 81-A: Reverse arrows direction for Force Main No. 2 only =====
+    const pressureDes = String((feature.properties && feature.properties.des) || "").trim();
+    const arrowLine = pressureDes === "2" ? line.slice().reverse() : line;
+
+    var latlngs = arrowLine.map(function(c){
+      return [c[1], c[0]];
+    });
+
+    L.polylineDecorator(latlngs, {
+  patterns: [{
+    offset: 12,
+    repeat: 45,
+    symbol: L.Symbol.arrowHead({
+      pixelSize: 8,
+      polygon: true,
+      pathOptions: {
+        color: '#ff00ff',
+        fillColor: '#ff00ff',
+        fillOpacity: 1,
+        weight: 1
+      }
+    })
+  }]
+}).addTo(pressureArrowsLayer);
+  });
+});
+
+buildDropdowns();
+});// ===== AHMED EDIT 46-D: Load Districts GeoJSON =====
+// ===== AHMED EDIT 48-C: Load Al Khafji Boundary GeoJSON =====
+fetch('data/AL-khafje.geojson')
+.then(r=>r.json())
+.then(d=>{
+    boundaryLayer.clearLayers();
+    boundaryLayer.addData(d);
+
+    // ===== AHMED EDIT 49-B: Initial zoom to Al Khafji Boundary =====
+    // ===== AHMED EDIT 49-E: Delayed zoom to boundary after layer draw =====
+// ===== AHMED EDIT 49-G: Initial fixed zoom to Al Khafji =====
+// ===== AHMED EDIT 63-B: Initial zoom already set in map startup =====
+// map.setView([28.42, 48.49], 12.25);
+});
+fetch('data/districts.geojson?v=20260513')
+.then(r=>r.json())
+.then(d=>{
+  D=d.features;
+// ===== AHMED EDIT 46-M: Remove الحرس الوطني from districts =====
+d.features = d.features.filter(f => {
+    const n = (f.properties.ArabicName || "").trim();
+    return n !== "الحرس الوطني";
+});
+
+districtLayer.addData(d);});
+// ===== AHMED EDIT 50-B: Apply districts zoom visibility after load =====
+updateDistrictsVisibilityByZoom();
+fetch('data/electric.geojson?v=20260514-ps')
+.then(r=>r.json())
+.then(d=>{
+E=d.features;
+electricLayer.addData({
+type:"FeatureCollection",
+features:E
+});
+});
+
+/* ===== AHMED MARK 26: زرار الطبقات يمين فوق ===== */
+/* ================= LAYERS CONTROL (UNBREAKABLE) ================= */
+/* ===== AHMED EDIT 36-B: إضافة Hillshade لقائمة الطبقات بشكل آمن ===== */
+/* ===== AHMED EDIT 39: جعل Imagery طبقة اختيار عادية Checkbox ===== */
+// ===== AHMED EDIT 43-B: Show terrain opacity controls only when needed =====
+// ===== AHMED EDIT 66-C: Layer order data =====
+let layerOrderList = [];
+
+function setupLayerOrderList(){
+  layerOrderList = [
+    { name:"استخدامات الأراضي", layer:landLayer },
+{ name:"أحواض التصريف", layer:basinLayer },
+{ name:"مسارات مجاري الأودية", layer:streamsLayer },
+{ name:"الأحياء", layer:districtLayer },
+{ name:"حدود النطاق العمراني", layer:boundaryLayer },
+{ name:"شبكة الطرق", layer:roadsLayer },
+{ name:"الحلول الهندسية", layer:solutionLayers },
+{ name:"الشبكات تصريف الأمطار", layer:networkLayer },
+{ name:"خطوط الطرد", layer:pressureLayer },
+{ name:"محطات الرفع", layer:electricLayer },
+{ name:"نموذج الارتفاعات", layer:demLayer },
+{ name:"الظلال التضاريسية", layer:hillshadeLayer }
+  ];
+}
+// ===== AHMED EDIT 66-D: Render and move layer order =====
+// ===== AHMED EDIT 67-C: Add order arrows inside Leaflet Layers control =====
+// ===== AHMED EDIT 68-A: Drag layers inside Leaflet Layers control =====
+let draggedLayerLabel = null;
+// ===== AHMED EDIT 71-B: Zoom to layer from LAYERS control =====
+function zoomToLayerFromControl(layerName){
+  if(layerName === "نموذج الارتفاعات" || layerName === "الظلال التضاريسية"){
+    if(boundaryLayer.getBounds && boundaryLayer.getBounds().isValid()){
+      map.fitBounds(boundaryLayer.getBounds(), {
+        padding:[40,40],
+        maxZoom:16,
+        animate:true
+      });
+    }
+    return;
+  }
+
+  const item = layerOrderList.find(function(x){
+    return x.name === layerName;
+  });
+
+  if(!item || !item.layer || !item.layer.getBounds){
+    return;
+  }
+
+  const bounds = item.layer.getBounds();
+
+  if(bounds && bounds.isValid()){
+    map.fitBounds(bounds, {
+      padding:[40,40],
+      maxZoom:16,
+      animate:true
+    });
+  }
+}
+function enableDragOrderInsideLayersControl(){
+  document.querySelectorAll('.layer-control-order-btn').forEach(function(btn){
+    btn.remove();
+  });
+  const container = document.querySelector('.leaflet-control-layers-overlays');
+  if(!container) return;
+
+  const labels = container.querySelectorAll('label');
+
+  labels.forEach(function(label){
+    label.setAttribute('draggable', 'true');
+label.style.cursor = "move";
+
+    // ===== AHMED EDIT 71-C: Add zoom button to GeoJSON layers only =====
+    const layerName = label.innerText.trim();
+
+        if(
+      !label.querySelector('.layer-zoom-btn') &&
+      layerName !== "الصور الجوية"
+    ){
+      const zoomBtn = document.createElement('button');
+      zoomBtn.className = 'layer-zoom-btn';
+      zoomBtn.type = 'button';
+      zoomBtn.innerHTML = '🔎+';
+      zoomBtn.title = 'Zoom to layer';
+
+      zoomBtn.onclick = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        zoomToLayerFromControl(layerName);
+      };
+
+      label.appendChild(zoomBtn);
+    }
+    label.ondragstart = function(e){
+      draggedLayerLabel = label;
+      label.style.opacity = "0.45";
+      e.dataTransfer.effectAllowed = "move";
+    };
+
+    label.ondragend = function(){
+      label.style.opacity = "1";
+      draggedLayerLabel = null;
+      applyLayerOrderFromLayersControl();
+    };
+
+    label.ondragover = function(e){
+      e.preventDefault();
+    };
+
+      label.ondrop = function(e){
+      e.preventDefault();
+
+      if(!draggedLayerLabel || draggedLayerLabel === label){
+        return;
+      }
+
+      const rect = label.getBoundingClientRect();
+      const dropAfter = e.clientY > rect.top + rect.height / 2;
+
+      if(dropAfter){
+        container.insertBefore(draggedLayerLabel, label.nextSibling);
+      } else {
+        container.insertBefore(draggedLayerLabel, label);
+      }
+    };
+  });
+}
+
+function applyLayerOrderFromLayersControl(){
+  const labels = Array.from(document.querySelectorAll('.leaflet-control-layers-overlays label'));
+
+  labels.reverse().forEach(function(label){
+    const layerName = label.innerText.trim();
+
+    const item = layerOrderList.find(function(x){
+      return x.name === layerName;
+    });
+
+    if(item && map.hasLayer(item.layer) && item.layer.bringToFront){
+      item.layer.bringToFront();
+    }
+  });
+}function addOrderButtonsInsideLayersControl(){
+  return;
+  const labels = document.querySelectorAll('.leaflet-control-layers-overlays label');
+
+  labels.forEach(function(label){
+    if(label.querySelector('.layer-control-order-btn')){
+      return;
     }
 
-    setInterval(draw, 30);
+    const upBtn = document.createElement('button');
+    upBtn.className = 'layer-control-order-btn';
+    upBtn.innerHTML = '↑';
+    upBtn.type = 'button';
+
+    const downBtn = document.createElement('button');
+    downBtn.className = 'layer-control-order-btn';
+    downBtn.innerHTML = '↓';
+    downBtn.type = 'button';
+
+    upBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    downBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    label.appendChild(upBtn);
+    label.appendChild(downBtn);
+  });
+}
+function renderLayerOrderPanel(){
+  const panel = document.getElementById("layerOrderPanel");
+  if(!panel) return;
+
+  panel.innerHTML = "";
+
+  layerOrderList.forEach(function(item, index){
+    const row = document.createElement("div");
+    row.className = "layer-order-row";
+
+    row.innerHTML = `
+      <button class="layer-order-btn" onclick="moveLayerOrder(${index}, -1)">↑</button>
+      <span class="layer-order-name">${item.name}</span>
+      <button class="layer-order-btn" onclick="moveLayerOrder(${index}, 1)">↓</button>
+    `;
+
+    panel.appendChild(row);
+  });
+}
+
+function applyLayerOrder(){
+  layerOrderList.forEach(function(item){
+    if(map.hasLayer(item.layer) && item.layer.bringToFront){
+      item.layer.bringToFront();
+    }
+  });
+}
+
+function moveLayerOrder(index, direction){
+  const newIndex = index + direction;
+
+  if(newIndex < 0 || newIndex >= layerOrderList.length){
+    return;
+  }
+
+  const item = layerOrderList.splice(index, 1)[0];
+  layerOrderList.splice(newIndex, 0, item);
+
+  renderLayerOrderPanel();
+  applyLayerOrder();
+}
+function updateTerrainOpacityBox(){
+  const box = document.getElementById('terrainOpacityBox');
+  if(!box) return;
+
+  if(map.hasLayer(demLayer) || map.hasLayer(hillshadeLayer)){
+    box.style.display = "block";
+  } else {
+    box.style.display = "none";
+  }
+// ===== AHMED EDIT 47-C: Show terrain legend only with DEM/Hillshade =====
+const terrainLegend = document.getElementById('terrainLegendBox');
+if(terrainLegend){
+  terrainLegend.style.display =
+    (map.hasLayer(demLayer) || map.hasLayer(hillshadeLayer)) ? "block" : "none";
+}
+}
+// ===== AHMED EDIT 44-SAFE: Safe Land Use Legend Visibility =====
+function updateLandUseLegendSafe(){
+  const legend = document.getElementById('legendBox');
+
+  if(!legend || typeof landLayer === "undefined"){
+    return;
+  }
+
+  if(map.hasLayer(landLayer)){
+    legend.style.display = "block";
+  } else {
+    legend.style.display = "none";
+  }
+}
+function initLayers(){
+setTimeout(()=>{
+// ===== AHMED EDIT 42-B: DEM opacity change =====
+document.getElementById('demOpacity').addEventListener('input', function () {
+  demLayer.setOpacity(Number(this.value));
+});
+
+// ===== AHMED EDIT 42-D: Hillshade opacity change =====
+document.getElementById('hillshadeOpacity').addEventListener('input', function () {
+  hillshadeLayer.setOpacity(Number(this.value));
+});
+// ===== AHMED EDIT 43-C: Watch terrain layer changes =====
+map.on('overlayadd overlayremove', updateTerrainOpacityBox);
+// ===== AHMED FIX 71-E: Keep zoom buttons fixed inside LAYERS =====
+map.on('overlayadd overlayremove', function(){
+  setTimeout(function(){
+    enableDragOrderInsideLayersControl();
+  },100);
+});
+// ===== AHMED EDIT 44-SAFE-B: Watch Land Use legend safely =====
+map.on('overlayadd overlayremove', updateLandUseLegendSafe);
+updateTerrainOpacityBox();
+// ===== AHMED EDIT 44-SAFE-C: Initial Land Use legend state =====
+updateLandUseLegendSafe();
+// ===== AHMED EDIT 53-G: Keep Engineering Solutions on top =====
+function keepSolutionsOnTop(){
+  solutionLayers.eachLayer(function(layer){
+    layer.bringToFront();
+  });
+}
+
+map.on('overlayadd overlayremove zoomend', keepSolutionsOnTop);
+keepSolutionsOnTop();
+// ===== AHMED EDIT 57-C: Sync Open Channel with Engineering Solutions =====
+map.on('overlayadd', function(e){
+  if(e.layer === solutionLayers){
+    map.addLayer(openChannelLayer);
+  }
+});
+
+map.on('overlayremove', function(e){
+  if(e.layer === solutionLayers){
+    map.removeLayer(openChannelLayer);
+  }
+});
+// ===== AHMED EDIT 54-A: Hide all layers button inside layer control area =====
+// ===== AHMED EDIT 58-B: Layers title above layer control =====
+const layersTitleControl = L.control({ position: 'topright' });
+
+layersTitleControl.onAdd = function(){
+  const div = L.DomUtil.create('div', 'layers-title-box');
+  div.innerHTML = `الطبقات ▸`;
+div.title = "إظهار / إخفاء الطبقات";
+div.onclick = toggleLayersPanel;
+  L.DomEvent.disableClickPropagation(div);
+  return div;
+};
+const hideAllControl = L.control({ position: 'topright' });
+
+hideAllControl.onAdd = function(){
+  const div = L.DomUtil.create('div', 'leaflet-control-layers hide-all-layers-box');
+  div.innerHTML = `<button id="toggleAllLayersBtn" onclick="toggleAllOverlays()">إخفاء الطبقات</button>`;
+  L.DomEvent.disableClickPropagation(div);
+  return div;
+};
+layersTitleControl.addTo(map);
+L.control.layers(
+null,
+{
+"الصور الجوية":imagery,
+"استخدامات الأراضي":landLayer,
+"الأحياء":districtLayer,
+"حدود النطاق العمراني":boundaryLayer,
+"أحواض التصريف":basinLayer,
+"مسارات مجاري الأودية":streamsLayer,
+"شبكة الطرق":roadsLayer,
+"الحلول الهندسية":solutionLayers,
+"الشبكات تصريف الأمطار":networkLayer,
+"خطوط الطرد":pressureLayer,
+"محطات الرفع":electricLayer,
+"نموذج الارتفاعات":demLayer,
+"الظلال التضاريسية":hillshadeLayer
+},{
+collapsed:false,
+position:"topright"
+}
+).addTo(map);
+hideAllControl.addTo(map);
+
+// ===== AHMED FIX 68-I: Enable drag order after Layers control is ready =====
+setTimeout(function(){
+  enableDragOrderInsideLayersControl();
+},700);
+// ===== AHMED EDIT 64-B: Full extent button inside zoom control position =====
+const fullExtentControl = L.control({ position: 'topleft' });
+
+fullExtentControl.onAdd = function(){
+  const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control full-extent-control');
+  div.innerHTML = `<a href="#" title="الخريطة كاملة">🌐</a>`;
+
+  div.onclick = function(e){
+    L.DomEvent.preventDefault(e);
+
+    if(basinLayer.getBounds && basinLayer.getBounds().isValid()){
+      map.fitBounds(basinLayer.getBounds(), {
+        padding:[35,35],
+        maxZoom:15,
+        animate:true
+      });
+
+      map.panBy([100, 0], {
+        animate:true
+      });
+    }
+  };
+
+  L.DomEvent.disableClickPropagation(div);
+  return div;
+};
+
+fullExtentControl.addTo(map);
+},800);
+}
+/* ===== AHMED MARK 27: تشغيل النظام ===== */
+/* ================= BOOT SYSTEM ================= */
+/* ===== AHMED EDIT 22: وظيفة إظهار وإخفاء القائمة الجانبية ===== */
+// ===== AHMED EDIT 54-B: Hide all overlay layers except imagery =====
+// ===== AHMED EDIT 60-B: Toggle layers panel from LAYERS title =====
+// ===== AHMED EDIT 60-K: Toggle layers panel using body class =====
+function toggleLayersPanel(){
+  const titleBox = document.querySelector('.layers-title-box');
+
+  document.body.classList.toggle("layers-collapsed");
+
+  const isCollapsed = document.body.classList.contains("layers-collapsed");
+
+  if(titleBox){
+    titleBox.innerHTML = isCollapsed ? "الطبقات ▸" : "الطبقات ▾";
+  }
+
+  setTimeout(function(){
+    enableDragOrderInsideLayersControl();
+  },150);
+}
+
+function toggleAllOverlays(){
+if(typeof allLayersHidden === "undefined"){
+  window.allLayersHidden = false;
+}
+  const layers = [
+    landLayer,
+    districtLayer,
+    boundaryLayer,
+      basinLayer,
+      streamsLayer,
+      roadsLayer,
+    solutionLayers,
+    networkLayer,
+    pressureLayer,
+    electricLayer,
+    demLayer,
+    hillshadeLayer
+  ];
+if(!window.allLayersHidden){
+  layers.forEach(function(layer){
+    if(map.hasLayer(layer)){
+      map.removeLayer(layer);
+    }
+  });
+window.allLayersHidden = true;
+document.getElementById("toggleAllLayersBtn").innerText = "إظهار الطبقات";
+return;
+}
+if(window.allLayersHidden){
+  layers.forEach(function(layer){
+    if(!map.hasLayer(layer)){
+      layer.addTo(map);
+    }
+  });
+
+  window.allLayersHidden = false;
+  document.getElementById("toggleAllLayersBtn").innerText = "إخفاء الطبقات";
+  keepSolutionsOnTop();
+
+  updateTerrainOpacityBox();
+  updateLandUseLegendSafe();
+}
+  updateTerrainOpacityBox();
+  updateLandUseLegendSafe();
+}
+// ===== AHMED FIX 74-E: Toggle contact box =====
+function toggleContactBox(){
+  const box = document.getElementById("contactBox");
+  const btn = document.getElementById("contactToggleBtn");
+
+  if(!box || !btn) return;
+
+  box.classList.toggle("contact-open");
+
+  btn.innerHTML = box.classList.contains("contact-open")
+    ? "للتواصل ▾"
+    : "للتواصل ▸";
+}
+function toggleSidebar(){
+document.body.classList.toggle("sidebar-hidden");
+
+// ===== AHMED FIX 67-E: Disable old arrow buttons =====
+// setTimeout(function(){
+//   addOrderButtonsInsideLayersControl();
+// },300);
+setTimeout(function(){
+map.invalidateSize();
+},300);
+}
+function boot(){
+buildUI();
+bindBrightness();
+// ===== AHMED EDIT 42-G: Bind DEM and Hillshade opacity sliders =====
+document.getElementById('demOpacity').addEventListener('input', function () {
+  demLayer.setOpacity(Number(this.value));
+});
+
+document.getElementById('hillshadeOpacity').addEventListener('input', function () {
+  hillshadeLayer.setOpacity(Number(this.value));
+});
+setupLayerOrderList();
+renderLayerOrderPanel();
+initLayers();
+}
+
+boot();
+
+
+/* ===== AHMED MARK 28: نهاية JavaScript ===== */
 </script>
 
 </body>
