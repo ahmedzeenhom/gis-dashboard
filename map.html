@@ -1433,7 +1433,13 @@ function drawPressureArrows(features){
 }
 function filterPressure(v){
 pressureLayer.clearLayers();
+
+if(map.hasLayer(pressureArrowsLayer)){
+  map.removeLayer(pressureArrowsLayer);
+}
+
 pressureArrowsLayer.clearLayers();
+pressureArrowsLayer.addTo(map);
 
 const filteredPressure = v==="all"
   ? P
@@ -1445,8 +1451,7 @@ features: filteredPressure
 });
 
 drawPressureArrows(filteredPressure);
-}
-/* ===== AHMED EDIT 18: فلتر محطات الرفع مع الحفاظ على الألوان ===== */
+}/* ===== AHMED EDIT 18: فلتر محطات الرفع مع الحفاظ على الألوان ===== */
 function filterElectric(v){
 electricLayer.clearLayers();
 
@@ -1625,7 +1630,7 @@ map.on('overlayremove', function(e) {
 
 buildDropdowns();
 });
-ffetch('data/pressure_line.geojson?v=20260517-arrows')etch('data/pressure_line.geojson')
+fetch('data/pressure_line.geojson?v=20260517-arrows')
 .then(r=>r.json())
 .then(d=>{
 P=d.features;
