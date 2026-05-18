@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Project</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
     * {
@@ -15,7 +16,26 @@
 
     body {
     height: 100vh;
-    background: url('images/storm-clean.jpg') center center / cover no-repeat fixed;
+      opacity: 0;
+      animation: pageFade 0.4s ease forwards;
+    background:
+linear-gradient(
+180deg,
+#06111f 0%,
+#08192b 35%,
+#0a2034 60%,
+#06111f 100%
+);
+       background-image:
+linear-gradient(
+rgba(0,0,0,0.15),
+rgba(0,0,0,0.25)
+),
+url('images/storm-clean.jpg');
+       background-position: center center;
+       background-size: cover;
+       background-repeat: no-repeat;
+       background-attachment: fixed;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -62,7 +82,14 @@ body::after {
         box-shadow: 0 0 60px rgba(0,255,200,0.2);
         z-index: 2;
     }
-
+.storm-logo{
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(0,255,200,0.45));
+    vertical-align: middle;
+    margin-left: 10px;
+}
     .card h1 {
         font-size: 30px;
         margin-bottom: 20px;
@@ -72,10 +99,11 @@ body::after {
     }
 
     .card p {
-        font-size: 14px;
+        font-size: 15px;
         line-height: 2;
-        opacity: 0.85;
+        opacity: 0.95;
         margin-bottom: 40px;
+             font-weight: 600;
     }
 
     .btn {
@@ -125,53 +153,42 @@ body::after {
         margin-top: 5px;
         letter-spacing: 1px;
     }
-/* AHMED FIX 2 - Real Rain + Lightning */
-/* AHMED FIX 3 - Hide bad rain overlay */
-.rain {
-    display: none;
-}
+/* AHMED EDIT - FEATURES */
+.features {
     position: fixed;
-    inset: -120px 0 0 0;
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.45;
-    background-image:
-        repeating-linear-gradient(
-            105deg,
-            rgba(255,255,255,0.35) 0px,
-            rgba(255,255,255,0.35) 1px,
-            transparent 1px,
-            transparent 18px
-        );
-    background-size: 18px 120px;
-    animation: rainFall 0.35s linear infinite;
+    bottom: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 55px;
+    z-index: 5;
 }
 
+.feature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    font-size: 15px;
+    opacity: 0.95;
+}
+
+.feature i {
+    font-size: 34px;
+    margin-bottom: 12px;
+    background: linear-gradient(90deg, #00f260, #0575e6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.feature span {
+    font-weight: 600;
+    margin-top: 6px;
+}
+/* AHMED FIX - Hide old rain/lightning layers */
+.rain,
 .lightning {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    background: radial-gradient(circle at 25% 15%, rgba(180,220,255,0.75), transparent 35%);
-    opacity: 0;
-    animation: lightningFlash 5s infinite;
-}
-
-@keyframes rainFall {
-    from {
-        transform: translate3d(0, -120px, 0);
-    }
-    to {
-        transform: translate3d(-40px, 120px, 0);
-    }
-}
-
-@keyframes lightningFlash {
-    0%, 88%, 100% { opacity: 0; }
-    89% { opacity: 0.9; }
-    90% { opacity: 0.05; }
-    91% { opacity: 0.65; }
-    92% { opacity: 0; }
+    display: none !important;
 }
 /* AHMED EDIT 3 - Use storm image as full landing page */
 canvas,
@@ -188,11 +205,32 @@ canvas,
     z-index: 999999;
     border-radius: 50px;
 }
+@keyframes pageFade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+/* AHMED LIGHTNING */
+
+.lightning-flash{
+    position: fixed;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: screen;
+}
 </style>
 </head>
 
 <body>
-
+<audio id="thunderAudio" preload="auto">
+    <source src="sounds/thunder.mp3" type="audio/mpeg">
+</audio>
 <canvas id="bg"></canvas>
 <div class="lightning"></div>
 <div class="rain"></div>
@@ -200,11 +238,15 @@ canvas,
 <div class="rain"></div>
 
 <div class="card">
-    <h1>⛈️ مشروع الخفجي لتصريف الأمطار</h1>
+    <h1>
+    مشروع الخفجي
+</h1>
 
     <p>
-        مشروع دراسات والتصاميم و تخفيض منسوب المياه السطحية و درء أخطار السيول 
-        و شبكة تصريف مياه الأمطار بمحافظة الخفجي و المراكز التابعة لها
+        مشروع الدراسات والتصاميم و تخفيض منسوب المياه السطحية
+و درء أخطار السيول و شبكة تصريف مياه الأمطار بمحافظة الخفجي
+<br>
+والمراكز التابعة لها
     </p>
 
     <a href="map.html?v=20260517-arrows" class="btn">
@@ -261,6 +303,76 @@ canvas,
 
     setInterval(draw, 30);
 </script>
+<div class="features">
 
+        <div class="feature">
+        <i class="fa-solid fa-cloud-rain"></i>
+        <span style="margin-top:10px;">تصريف مياه الأمطار</span>
+    </div>
+
+    <div class="feature">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>درء أخطار السيول</span>
+    </div>
+
+    <div class="feature">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        <span>شبكات التصريف</span>
+    </div>
+<div class="feature">
+    <i class="fa-solid fa-water"></i>
+    <span>تخفيض الجريان السطحي</span>
+</div>
+
+</div>
+
+<div class="lightning-flash"></div>
+<script>
+
+const flash = document.querySelector(".lightning-flash");
+const thunder = document.getElementById("thunderAudio");
+
+let soundEnabled = false;
+setTimeout(() => {
+    lightningEffect();
+}, 900);
+
+document.body.addEventListener("click", () => {
+    soundEnabled = true;
+}, { once:true });
+
+function lightningEffect(){
+
+    flash.style.transition = "none";
+    flash.style.opacity = "0.22";
+
+    setTimeout(() => {
+        flash.style.transition = "opacity 0.5s ease";
+        flash.style.opacity = "0";
+    }, 80);
+
+    if(soundEnabled){
+
+        thunder.volume = 0.18;
+
+        thunder.currentTime = 0;
+
+        setTimeout(() => {
+            thunder.play();
+        }, 500);
+    }
+}
+
+setInterval(() => {
+
+    const random = Math.random();
+
+    if(random > 0.72){
+        lightningEffect();
+    }
+
+}, 4000);
+
+</script>
 </body>
 </html>
