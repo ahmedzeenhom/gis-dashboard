@@ -16,7 +16,14 @@
 
     body {
     height: 100vh;
-    background: url('images/storm-clean.jpg') center center / cover no-repeat fixed;
+      opacity: 0;
+      animation: pageFade 0.4s ease forwards;
+    background-color: #020812;
+       background-image: url('images/storm-clean.jpg');
+       background-position: center center;
+       background-size: cover;
+       background-repeat: no-repeat;
+       background-attachment: fixed;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -220,6 +227,14 @@ canvas,
     height: 75px;
     z-index: 999999;
     border-radius: 50px;
+}
+@keyframes pageFade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 </style>
 </head>
