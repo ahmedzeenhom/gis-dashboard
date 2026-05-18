@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Project</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
     * {
@@ -126,6 +127,37 @@ body::after {
         margin-top: 5px;
         letter-spacing: 1px;
     }
+/* AHMED EDIT - FEATURES */
+.features {
+    position: fixed;
+    bottom: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 55px;
+    z-index: 5;
+}
+
+.feature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    font-size: 15px;
+    opacity: 0.95;
+}
+
+.feature i {
+    font-size: 34px;
+    margin-bottom: 12px;
+    background: linear-gradient(90deg, #00f260, #0575e6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.feature span {
+    font-weight: 600;
+}
 /* AHMED FIX 2 - Real Rain + Lightning */
 /* AHMED FIX 3 - Hide bad rain overlay */
 .rain {
@@ -264,6 +296,25 @@ canvas,
 
     setInterval(draw, 30);
 </script>
+<div class="features">
 
+        <div class="feature">
+        <i class="fa-solid fa-cloud-rain"></i>
+        <span>تصريف مياه الأمطار</span>
+    </div>
+
+    <div class="feature">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>درء أخطار السيول</span>
+    </div>
+
+    <div class="feature">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        <span>شبكات التصريف</span>
+    </div>
+<div class="feature">
+        <i class="fa-solid fa-water"></i>
+        <span>تخفيض الجريان السطحي</span>
+</div>
 </body>
 </html>
