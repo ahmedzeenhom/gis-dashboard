@@ -185,53 +185,10 @@ body::after {
     font-weight: 600;
     margin-top: 6px;
 }
-/* AHMED FIX 2 - Real Rain + Lightning */
-/* AHMED FIX 3 - Hide bad rain overlay */
-.rain {
-    display: none;
-}
-    position: fixed;
-    inset: -120px 0 0 0;
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.45;
-    background-image:
-        repeating-linear-gradient(
-            105deg,
-            rgba(255,255,255,0.35) 0px,
-            rgba(255,255,255,0.35) 1px,
-            transparent 1px,
-            transparent 18px
-        );
-    background-size: 18px 120px;
-    animation: rainFall 0.35s linear infinite;
-}
-
+/* AHMED FIX - Hide old rain/lightning layers */
+.rain,
 .lightning {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    background: radial-gradient(circle at 25% 15%, rgba(180,220,255,0.75), transparent 35%);
-    opacity: 0;
-    animation: lightningFlash 5s infinite;
-}
-
-@keyframes rainFall {
-    from {
-        transform: translate3d(0, -120px, 0);
-    }
-    to {
-        transform: translate3d(-40px, 120px, 0);
-    }
-}
-
-@keyframes lightningFlash {
-    0%, 88%, 100% { opacity: 0; }
-    89% { opacity: 0.9; }
-    90% { opacity: 0.05; }
-    91% { opacity: 0.65; }
-    92% { opacity: 0; }
+    display: none !important;
 }
 /* AHMED EDIT 3 - Use storm image as full landing page */
 canvas,
@@ -256,11 +213,24 @@ canvas,
         opacity: 1;
     }
 }
+/* AHMED LIGHTNING */
+
+.lightning-flash{
+    position: fixed;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: screen;
+}
 </style>
 </head>
 
 <body>
-
+<audio id="thunderAudio" preload="auto">
+    <source src="sounds/thunder.mp3" type="audio/mpeg">
+</audio>
 <canvas id="bg"></canvas>
 <div class="lightning"></div>
 <div class="rain"></div>
@@ -350,8 +320,59 @@ canvas,
         <span>شبكات التصريف</span>
     </div>
 <div class="feature">
-        <i class="fa-solid fa-water"></i>
-        <span>تخفيض الجريان السطحي</span>
+    <i class="fa-solid fa-water"></i>
+    <span>تخفيض الجريان السطحي</span>
 </div>
+
+</div>
+
+<div class="lightning-flash"></div>
+<script>
+
+const flash = document.querySelector(".lightning-flash");
+const thunder = document.getElementById("thunderAudio");
+
+let soundEnabled = false;
+setTimeout(() => {
+    lightningEffect();
+}, 900);
+
+document.body.addEventListener("click", () => {
+    soundEnabled = true;
+}, { once:true });
+
+function lightningEffect(){
+
+    flash.style.transition = "none";
+    flash.style.opacity = "0.22";
+
+    setTimeout(() => {
+        flash.style.transition = "opacity 0.5s ease";
+        flash.style.opacity = "0";
+    }, 80);
+
+    if(soundEnabled){
+
+        thunder.volume = 0.18;
+
+        thunder.currentTime = 0;
+
+        setTimeout(() => {
+            thunder.play();
+        }, 500);
+    }
+}
+
+setInterval(() => {
+
+    const random = Math.random();
+
+    if(random > 0.72){
+        lightningEffect();
+    }
+
+}, 4000);
+
+</script>
 </body>
 </html>
