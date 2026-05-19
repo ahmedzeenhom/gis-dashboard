@@ -339,7 +339,10 @@ setTimeout(() => {
 
 document.body.addEventListener("click", () => {
     soundEnabled = true;
-}, { once:true });
+    thunder.volume = 0.18;
+    thunder.currentTime = 0;
+    thunder.play().catch(() => {});
+});
 
 function lightningEffect(){
 
@@ -358,8 +361,8 @@ function lightningEffect(){
         thunder.currentTime = 0;
 
         setTimeout(() => {
-            thunder.play();
-        }, 500);
+    thunder.play().catch(() => {});
+}, 120);
     }
 }
 
