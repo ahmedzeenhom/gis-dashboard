@@ -1130,8 +1130,43 @@ l.bindPopup(`
 
 // ===== AHMED EDIT 62-A: Force Mains arrows layer group =====
 let pressureArrowsLayer = L.layerGroup();
+
+// ===== AHMED EDIT 99-A: Force Mains colors by status =====
+function pressureColor(des){
+  des = String(des || "").trim();
+
+  if(des === "1" || des === "2"){
+    return "#22c55e"; // قائم - أخضر
+  }
+
+  if(des === "3" || des === "4" || des === "5" || des === "6"){
+    return "#ef4444"; // مقترح - أحمر
+  }
+
+  return "#38bdf8";
+}
+
+function pressureDash(des){
+  des = String(des || "").trim();
+
+  if(des === "1" || des === "2"){
+    return null; // قائم - خط متصل
+  }
+
+  return "10 8"; // مقترح - خط متقطع
+}
+
 let pressureLayer=L.geoJSON(null,{
-style:{color:"#000",weight:3,opacity:1,dashArray:"10 8"},
+style:function(f){
+  const des = f.properties ? f.properties.des : "";
+
+  return {
+    color: pressureColor(des),
+    weight: 3,
+    opacity: 1,
+    dashArray: pressureDash(des)
+  };
+},
 onEachFeature:function(f,l){
 
 let p=f.properties || {};
@@ -1532,11 +1567,11 @@ function drawPressureArrows(features){
             pixelSize: 8,
             polygon: true,
             pathOptions: {
-              color: '#ff00ff',
-              fillColor: '#ff00ff',
-              fillOpacity: 1,
-              weight: 1
-            }
+  color: pressureColor(pressureDes),
+  fillColor: pressureColor(pressureDes),
+  fillOpacity: 1,
+  weight: 1
+}
           })
         }]
       }).addTo(pressureArrowsLayer);
@@ -1610,8 +1645,9 @@ if(pressureChoices){
     pressureChoices.innerHTML += `
 <label class="multi-filter-row">
 <input type="checkbox" value="${v}" checked onchange="onPressureChoiceChange()">
-<span>${v}</span>
-</label>`;
+<span>${(String(v)==="1" || String(v)==="2")
+? "🟢 FM-" + v + " (قائم)"
+: "🔴 FM-" + v + " (مقترح)"}</span></label>`;
   });
 
   syncAllCheckbox('pressureAll','pressureChoices');
