@@ -261,6 +261,42 @@ background:#0f172a;
 color:#ffffff;
 }
 
+/* ===== AHMED EDIT 98-A: Multi selection filters for Networks and Force Mains ===== */
+.multi-filter-box{
+width:100%;
+box-sizing:border-box;
+margin-top:6px;
+background:rgba(2,6,23,0.75);
+color:#fff;
+border-radius:10px;
+border:1px solid rgba(56,189,248,0.35);
+font-weight:700;
+padding:8px;
+max-height:155px;
+overflow-y:auto;
+}
+
+.multi-filter-row{
+display:flex;
+align-items:center;
+gap:8px;
+padding:5px 4px;
+font-size:14px;
+cursor:pointer;
+}
+
+.multi-filter-row input{
+width:auto !important;
+margin:0 !important;
+accent-color:#38bdf8;
+}
+
+.multi-filter-separator{
+height:1px;
+background:rgba(56,189,248,0.25);
+margin:6px 0;
+}
+
 /* ===== AHMED MARK 08: مكان ظهور زرار الطبقات ===== */
 /* LAYERS FIX */
 .leaflet-control{
@@ -1094,8 +1130,43 @@ l.bindPopup(`
 
 // ===== AHMED EDIT 62-A: Force Mains arrows layer group =====
 let pressureArrowsLayer = L.layerGroup();
+
+// ===== AHMED EDIT 99-A: Force Mains colors by status =====
+function pressureColor(des){
+  des = String(des || "").trim();
+
+  if(des === "1" || des === "2"){
+    return "#22c55e"; // قائم - أخضر
+  }
+
+  if(des === "3" || des === "4" || des === "5" || des === "6"){
+    return "#ef4444"; // مقترح - أحمر
+  }
+
+  return "#38bdf8";
+}
+
+function pressureDash(des){
+  des = String(des || "").trim();
+
+  if(des === "1" || des === "2"){
+    return null; // قائم - خط متصل
+  }
+
+  return "10 8"; // مقترح - خط متقطع
+}
+
 let pressureLayer=L.geoJSON(null,{
-style:{color:"#000",weight:3,opacity:1,dashArray:"10 8"},
+style:function(f){
+  const des = f.properties ? f.properties.des : "";
+
+  return {
+    color: pressureColor(des),
+    weight: 3,
+    opacity: 1,
+    dashArray: pressureDash(des)
+  };
+},
 onEachFeature:function(f,l){
 
 let p=f.properties || {};
@@ -1325,16 +1396,26 @@ document.getElementById("sidebar").innerHTML = `
 
 <div class="section-header">
 <h3>الشبكات</h3>
-<select id="networkFilter" onchange="filterNetwork(this.value)">
-<option value="all">All</option>
-</select>
+<div id="networkFilterBox" class="multi-filter-box">
+<label class="multi-filter-row">
+<input type="checkbox" id="networkAll" checked onchange="toggleAllNetwork(this.checked)">
+<span>All</span>
+</label>
+<div class="multi-filter-separator"></div>
+<div id="networkChoices"></div>
+</div>
 </div>
 
 <div class="section-header">
 <h3>خطوط الطرد</h3>
-<select id="pressureFilter" onchange="filterPressure(this.value)">
-<option value="all">All</option>
-</select>
+<div id="pressureFilterBox" class="multi-filter-box">
+<label class="multi-filter-row">
+<input type="checkbox" id="pressureAll" checked onchange="toggleAllPressure(this.checked)">
+<span>All</span>
+</label>
+<div class="multi-filter-separator"></div>
+<div id="pressureChoices"></div>
+</div>
 </div>
 
 <div class="section-header">
@@ -1393,11 +1474,70 @@ let v=useFilter.value;
 renderLand(v==="all"?K:K.filter(x=>String(x.properties.USE).includes(v)));
 }
 
-function filterNetwork(v){
+// ===== AHMED EDIT 98-B: Multi filter helper functions =====
+function getCheckedValues(containerId){
+  const box = document.getElementById(containerId);
+  if(!box) return [];
+
+  return Array.from(box.querySelectorAll('input[type="checkbox"]:checked'))
+    .map(function(input){
+      return String(input.value);
+    });
+}
+
+function syncAllCheckbox(allId, containerId){
+  const allBox = document.getElementById(allId);
+  const box = document.getElementById(containerId);
+
+  if(!allBox || !box) return;
+
+  const inputs = Array.from(box.querySelectorAll('input[type="checkbox"]'));
+  allBox.checked = inputs.length > 0 && inputs.every(function(input){
+    return input.checked;
+  });
+}
+
+function toggleAllNetwork(checked){
+  document.querySelectorAll('#networkChoices input[type="checkbox"]').forEach(function(input){
+    input.checked = checked;
+  });
+
+  filterNetwork();
+}
+
+function onNetworkChoiceChange(){
+  syncAllCheckbox('networkAll','networkChoices');
+  filterNetwork();
+}
+
+function toggleAllPressure(checked){
+  document.querySelectorAll('#pressureChoices input[type="checkbox"]').forEach(function(input){
+    input.checked = checked;
+  });
+
+  filterPressure();
+}
+
+function onPressureChoiceChange(){
+  syncAllCheckbox('pressureAll','pressureChoices');
+  filterPressure();
+}
+
+function filterNetwork(){
 networkLayer.clearLayers();
+
+const allBox = document.getElementById('networkAll');
+const selected = getCheckedValues('networkChoices');
+
+const filteredNetwork = (allBox && allBox.checked)
+  ? N
+  : N.filter(function(x){
+      return selected.includes(String(x.properties.NO));
+    });
+
 networkLayer.addData({
 type:"FeatureCollection",
-features: v==="all"?N:N.filter(x=>String(x.properties.NO)==v)
+features: filteredNetwork
 });
 }
 // ===== AHMED FIX 97-C: Draw Force Mains arrows based on current filter =====
@@ -1427,18 +1567,18 @@ function drawPressureArrows(features){
             pixelSize: 8,
             polygon: true,
             pathOptions: {
-              color: '#ff00ff',
-              fillColor: '#ff00ff',
-              fillOpacity: 1,
-              weight: 1
-            }
+  color: pressureColor(pressureDes),
+  fillColor: pressureColor(pressureDes),
+  fillOpacity: 1,
+  weight: 1
+}
           })
         }]
       }).addTo(pressureArrowsLayer);
     });
   });
 }
-function filterPressure(v){
+function filterPressure(){
 pressureLayer.clearLayers();
 
 if(map.hasLayer(pressureArrowsLayer)){
@@ -1448,9 +1588,14 @@ if(map.hasLayer(pressureArrowsLayer)){
 pressureArrowsLayer.clearLayers();
 pressureArrowsLayer.addTo(map);
 
-const filteredPressure = v==="all"
+const allBox = document.getElementById('pressureAll');
+const selected = getCheckedValues('pressureChoices');
+
+const filteredPressure = (allBox && allBox.checked)
   ? P
-  : P.filter(x=>String(x.properties.des)==v);
+  : P.filter(function(x){
+      return selected.includes(String(x.properties.des));
+    });
 
 pressureLayer.addData({
 type:"FeatureCollection",
@@ -1471,19 +1616,42 @@ features: v==="all"?E:E.filter(x=>String(x.properties.StructureStatus)==v)
 /* ================= DROPDOWN AUTO FIX ================= */
 function buildDropdowns(){
 
-networkFilter.innerHTML=`<option value="all">All</option>`;
-[...new Set(N.map(x=>x.properties.NO))]
-.sort((a,b)=>Number(a)-Number(b))
-.forEach(v=>{
-networkFilter.innerHTML+=`<option value="${v}">${v}</option>`;
-});
+const networkChoices = document.getElementById("networkChoices");
+if(networkChoices){
+  networkChoices.innerHTML = "";
 
-pressureFilter.innerHTML=`<option value="all">All</option>`;
-[...new Set(P.map(x=>x.properties.des))]
-.sort((a,b)=>Number(a)-Number(b))
-.forEach(v=>{
-pressureFilter.innerHTML+=`<option value="${v}">${v}</option>`;
-});
+  [...new Set(N.map(x=>x.properties.NO))]
+  .filter(v => v !== undefined && v !== null && String(v).trim() !== "")
+  .sort((a,b)=>Number(a)-Number(b))
+  .forEach(v=>{
+    networkChoices.innerHTML += `
+<label class="multi-filter-row">
+<input type="checkbox" value="${v}" checked onchange="onNetworkChoiceChange()">
+<span>${v}</span>
+</label>`;
+  });
+
+  syncAllCheckbox('networkAll','networkChoices');
+}
+
+const pressureChoices = document.getElementById("pressureChoices");
+if(pressureChoices){
+  pressureChoices.innerHTML = "";
+
+  [...new Set(P.map(x=>x.properties.des))]
+  .filter(v => v !== undefined && v !== null && String(v).trim() !== "")
+  .sort((a,b)=>Number(a)-Number(b))
+  .forEach(v=>{
+    pressureChoices.innerHTML += `
+<label class="multi-filter-row">
+<input type="checkbox" value="${v}" checked onchange="onPressureChoiceChange()">
+<span>${(String(v)==="1" || String(v)==="2")
+? "🟢 FM-" + v + " (قائم)"
+: "🔴 FM-" + v + " (مقترح)"}</span></label>`;
+  });
+
+  syncAllCheckbox('pressureAll','pressureChoices');
+}
 }
 
 /* ===== AHMED MARK 24: السطوع والتباين ===== */
